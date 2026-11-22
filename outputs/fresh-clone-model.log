@@ -1,0 +1,4 @@
+fee_model.py: wrote /tmp/pftl-fee-market-repro.6gq4on/pack/outputs/derived/escalation-model.json and /tmp/pftl-fee-market-repro.6gq4on/pack/fixtures/escalation-model-table.csv
+  open-ledger fee: n=32 -> 10 drops, n=33 -> 5318 drops, n=64 -> 20000 drops, n=100 -> 48829 drops, n=256 -> 320000 drops
+  fill 100 txs: 1547779 drops (1.547779 PFT); fill 256 txs: 27091469 drops (27.091469 PFT)
+  queue capacity 2000; fill fee 20000 drops; accounts to fill 200; reserve locked 2000000000 drops (2000 PFT)

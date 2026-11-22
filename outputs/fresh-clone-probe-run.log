@@ -1,0 +1,25 @@
+probe_all.sh run start: 2026-11-22T19:02:16Z
+pack root: /tmp/pftl-fee-market-repro.6gq4on/pack
+safety boundary: read-only queries only; no transactions, no flood traffic
+server_info.json -> 200 1.152858s sha256=d93277735fa01d8a0eacaf9d88aeca544d7d7f3972f6e5d44182fac41a968114
+validated seq for numeric ledger fetch: 8277673
+ledger_current.json -> 200 0.761894s sha256=9f791898197ba999ed35bb481ddb04aad541b8babde1f67068b67517a58b0eb4
+ledger_closed.json -> 200 0.776685s sha256=120acd7492a45df969cc3696969295bb8feb91697f771c5ac52bfd60274a73b8
+fee.json -> 200 0.871929s sha256=c745c4337f2d042a7a1a72783cbc2c502d0982234f481d22a4945691715947d3
+feature_list.json -> 200 0.874000s sha256=70585f308ab55dfdc84093e95a21c3859099dcbf1c5b04f1f00cea3a6785984f
+server_state.json -> 200 0.834868s sha256=08f1b24cac9d528773c3ceedac7b59522300292221b2dedadb67b3d7eac8280a
+validators.json -> 403 0.769994s sha256=91268711f43361e9d094089486492db986d6413020b6763903eb4c3b473216b4
+peers.json -> 403 0.906021s sha256=91268711f43361e9d094089486492db986d6413020b6763903eb4c3b473216b4
+invalid_method.json -> 200 0.785199s sha256=e7b21b8092a7192fb17ab985ff2ebd3de10df4b395311385249fdea2acd17540
+ledger-load-sample.json sha256=c9dd5d5896052fff7c6f122a5ef0e329f67f2ccbbfadf1f64fb21385a86068d3
+ledger-load-sample: seqs 8277662-8277673 txn_counts [0, 1, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1]
+rpc-response-headers.txt sha256=4655c1143613e1a8d10bf14bb14c7a241dac67c802e2400ad2cc3a1e4f3c4ec2
+rpc-rate-limit-headers.txt sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855 (empty file = no rate-limit header observed)
+explorer_metrics.json -> 200 0.599515s 108B sha256=cafd29dba250425da17962b777c6efc6a2c10a27bb3058b44eeebffeb7991287
+explorer_health.json -> 500 0.838108s 33B sha256=de52b25e91c4558119b2a577b3d20a808e2bbca0f33b2caf63f5e81325a6a3ab
+postfiat_org.html -> 200 0.625459s 34713B sha256=6242495541001392fab42bfbafd8251a43e8cbb97f4a2b4720f3664b131eaaeb
+postfiat_whitepaper.html -> 200 0.804573s 163089B sha256=33b15b1a28f5ebdad68ccb3eeb719fc0e4738b8fe3e8ce89a5317143e7ba472c
+docs_postfiat_org.html -> 200 0.818985s 23388B sha256=0ee1da936309b07922d14e33ae9414a6a0d3c4463aa306a0ae9d28692c30c4f2
+unl_testnet_vl.json -> 200 0.502161s 14781B sha256=5d4f5a18a18fead4105e5dc00cf7e11a71b9be4bc140357d1b4ea12116df59e7
+whitepaper.txt sha256=656238f6a11bfa179bdb27da68a6e9ad69a8ca9aa1f41c56b8b8d7b35c1b87a7
+probe_all.sh run end: 2026-11-22T19:02:39Z
