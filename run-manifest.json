@@ -1,0 +1,47 @@
+{
+ "pack": "PFTL fee-market and spam-resistance evidence pack",
+ "generated_at_utc": "2026-11-22T19:01:00Z",
+ "probe_window_utc": "2026-11-22T18:47:58Z to 2026-11-22T18:48:23Z (probe_all.sh) + fee timeseries 2026-11-22T18:48:40Z to 2026-11-22T18:59:00Z",
+ "environment": {
+  "python": "3.12.3",
+  "tools": "curl, git, python3 (stdlib only)",
+  "network": "public endpoints only; no credentials, sessions, accounts, or signing"
+ },
+ "repo_pins": {
+  "postfiatd": "0085a1ff885d6a446369cf73a4430f75af22be55 (2026-10-10, PR #50 merge, v1.0.9)"
+ },
+ "live_endpoints": [
+  "https://rpc.testnet.postfiat.org/ (postfiatd 1.0.9, network_id 2025)",
+  "https://explorer.testnet.postfiat.org/api/v1/",
+  "https://postfiat.org/ and https://postfiat.org/whitepaper/ (Sept 2026)",
+  "https://docs.postfiat.org (Notion JavaScript shell; no retrievable content)",
+  "https://postfiat.org/testnet_vl.json"
+ ],
+ "counts": {
+  "findings_total": 12,
+  "by_severity": {
+   "HIGH": 2,
+   "MEDIUM": 5,
+   "LOW": 4,
+   "INFO": 1
+  },
+  "by_status": {
+   "MEASURED": 3,
+   "SPECIFIED": 7,
+   "UNVERIFIED": 2
+  },
+  "claims_total": 30,
+  "claims_by_status": {
+   "VERIFIED": 9,
+   "SPECIFIED": 16,
+   "UNVERIFIED": 1,
+   "UNTESTABLE": 4
+  }
+ },
+ "verdict": "12 findings: 2 HIGH, 5 MEDIUM, 4 LOW, 1 INFO. The fee market is at its floor on an idle testnet; the anti-spam machinery is implemented in pinned code but has never been exercised live, and the binding queue-fill cost is the 2,000 PFT account-reserve lockup, not transaction fees.",
+ "notes": [
+  "Assessment only: no transactions sent, no flood traffic, no mainnet touched, no funds spent, nothing signed.",
+  "Bounded observation only: at most ~40 read-only RPC calls in probe_all.sh plus 60 in the 20-sample fee time series.",
+  "Live values were re-probed for this pack; no numbers were copied from earlier packs."
+ ]
+}

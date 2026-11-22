@@ -1,0 +1,113 @@
+{
+ "generated_at_utc": "2026-11-22T19:01:00Z",
+ "findings": [
+  {
+   "id": "F-01",
+   "severity": "HIGH",
+   "status": "UNVERIFIED",
+   "title": "Fee escalation and queue eviction have never been exercised live",
+   "detail": "Every sampled ledger carries 0-4 transactions (mean 0.33 over the 12-ledger sample and 0.50 across the 20-sample time series; 0.26 per ledger per the explorer), the queue has been 0/2000 in every probe, and every fee level sits at its floor. The anti-spam machinery is verified in pinned code only; its live behaviour under load is unknown. A mainnet launch would be the first live test of the escalation path.",
+   "remediation": "Exercise the escalation path on a private, isolated network (not the shared testnet) with scripted load: fill the open ledger past 32 transactions, fill the queue to 2000, and record the fee responses. Publish the resulting fee curves before any mainnet decision.",
+   "evidence": "outputs/fee-timeseries.jsonl, outputs/ledger-load-sample.json, outputs/fee.json; claims C-03, C-24, C-25, C-26"
+  },
+  {
+   "id": "F-02",
+   "severity": "MEDIUM",
+   "status": "MEASURED",
+   "title": "The 5000-drop median fee is a floor artifact, not a market price",
+   "detail": "median_level is pinned at the 128000 minimumEscalationMultiplier floor because every ledger is empty (FeeMetrics::update sets the multiplier to the floor when a ledger has 0 transactions). The 5000-drop median_fee therefore says nothing about what users actually pay; wallets or fee estimators that treat it as the going rate overpay 500x the 10-drop base fee.",
+   "remediation": "Fee estimators should use open_ledger_fee (10 drops live) for the next transaction, not median_fee, and should document that median_fee is a floor while ledgers are empty.",
+   "evidence": "outputs/fee.json; fixtures/source-excerpts/TxQ-FeeMetrics-update-scaleFeeLevel.txt (TxQ.cpp:148-165); claim C-02"
+  },
+  {
+   "id": "F-03",
+   "severity": "HIGH",
+   "status": "SPECIFIED",
+   "title": "Queue-fill cost is dominated by the account reserve, not by fees",
+   "detail": "Filling all 2000 queue slots at the 10-drop minimum costs 20,000 drops (0.02 PFT) in fees. The binding cost is the reserve: 10 transactions per account means at least 200 accounts, each locking the 10 PFT account reserve, i.e. 2,000 PFT locked (refundable on account deletion, less fees). The reserve policy, not the fee market, is the effective Sybil defence for the queue.",
+   "remediation": "Do not lower the account reserve without re-modelling queue-fill cost; any reserve change must be evaluated against this 200-account / 2,000 PFT figure. Consider publishing the reserve as an explicit anti-spam parameter in operator documentation.",
+   "evidence": "outputs/derived/escalation-model.json (queue section); claims C-12, C-13, C-22, C-23"
+  },
+  {
+   "id": "F-04",
+   "severity": "MEDIUM",
+   "status": "SPECIFIED",
+   "title": "The 10-transaction per-account queue cap is trivially bypassed with fresh accounts",
+   "detail": "The queue code caps each account at 10 queued transactions (TxQ.h:148) but the ledger has no identity or reputation layer, so an attacker funds 200 fresh accounts (10 PFT reserve each) and queues 2000 transactions. The cap limits damage per account, not per attacker.",
+   "remediation": "Treat the per-account cap as a fairness mechanism, not an anti-Sybil control. The reserve is the control; monitor account-creation rate as the leading spam indicator.",
+   "evidence": "fixtures/source-excerpts/TxQ-Setup.txt (TxQ.h:148); claim C-13"
+  },
+  {
+   "id": "F-05",
+   "severity": "MEDIUM",
+   "status": "SPECIFIED",
+   "title": "Queue eviction can shelter a cheap transaction behind expensive ones from the same account",
+   "detail": "When the queue is full, the eviction comparison uses the victim account's average fee level across its queued transactions when that account holds more than one transaction (TxQ.cpp:1266-1299). A mixed-fee account's cheapest transaction can therefore survive eviction that an identical single-transaction account's transaction would not. This is a deliberate averaging rule, but it lets a spammer protect cheap queue slots with a few expensive ones.",
+   "remediation": "Document the averaging rule for operators; if eviction fairness matters, consider evicting strictly by lowest individual fee level instead of the per-account average.",
+   "evidence": "fixtures/source-excerpts/TxQ-queue-full-eviction.txt (TxQ.cpp:1243-1313); claim C-24"
+  },
+  {
+   "id": "F-06",
+   "severity": "LOW",
+   "status": "SPECIFIED",
+   "title": "The base fee cannot react faster than one flag ledger (~13 minutes)",
+   "detail": "Fee votes are collected only at flag ledgers, every 256 ledgers, and a new base fee only takes effect when a majority of validators vote toward it (FeeVoteImpl.cpp:206-240, Ledger.h:426). A spam burst shorter than ~13 minutes cannot be answered by a base-fee change at all; only the automatic escalation and queue mechanisms respond inside a burst.",
+   "remediation": "Do not rely on base-fee voting as a burst response. Treat escalation and queue eviction as the in-burst defences and the fee vote as a slow steering control.",
+   "evidence": "fixtures/source-excerpts/FeeVote-VotableValue.txt; claim C-20"
+  },
+  {
+   "id": "F-07",
+   "severity": "MEDIUM",
+   "status": "UNVERIFIED",
+   "title": "No per-client rate limit is observable on the public RPC proxy",
+   "detail": "The proxy's responses carry no rate-limit headers (outputs/rpc-rate-limit-headers.txt is empty) and no limit is advertised. The only documented RPC-layer protection is the per-endpoint resource charge/disconnect in the node (warn at 5000, drop at 25000 charge units over a 32 s decay window), which is measured at the peer layer and cannot be confirmed for the HTTPS proxy from outside. Whether a single client can hammer the proxy with cheap read requests is unknown.",
+   "remediation": "Publish the proxy's rate-limit policy (or state that there is none) and enforce a documented per-client limit at the proxy, independent of the node's peer-layer charges. Do not probe it with abusive traffic to find out.",
+   "evidence": "outputs/rpc-response-headers.txt, outputs/rpc-rate-limit-headers.txt; claims C-27, C-28"
+  },
+  {
+   "id": "F-08",
+   "severity": "LOW",
+   "status": "SPECIFIED",
+   "title": "The `fee` RPC is documented experimental and may change without warning",
+   "detail": "FeeEscalation.md states the `fee` command is still experimental and may change without warning. Clients that hard-code its response shape (levels/drops) risk breakage on upgrade; the same applies to the experimental server_info / server_state load fields.",
+   "remediation": "Pin client fee logic to the documented fields with a fallback to the 10-drop base fee, and re-check the `fee` response shape after every node upgrade.",
+   "evidence": "fixtures/source-excerpts/FeeEscalation-fee-command.txt (FeeEscalation.md:282-285); claim C-05"
+  },
+  {
+   "id": "F-09",
+   "severity": "LOW",
+   "status": "MEASURED",
+   "title": "Explorer health reports the node unreachable while metrics still answer",
+   "detail": "GET /api/v1/health returned HTTP 500 {\"message\":\"rippled unreachable\"} at probe time while /api/v1/metrics returned HTTP 200 with fresh values. Either the health check probes a different backend than the metrics endpoint, or the health signal is stale. Operators watching only the health endpoint would wrongly conclude the network is down.",
+   "remediation": "Reconcile the two endpoints to the same backend check, or document which backend each one probes.",
+   "evidence": "outputs/explorer_health.json, outputs/explorer_metrics.json; claim C-30"
+  },
+  {
+   "id": "F-10",
+   "severity": "INFO",
+   "status": "SPECIFIED",
+   "title": "Server-local load fee can reach 1,000,000x base, but it is per-node, not consensus",
+   "detail": "LoadFeeTrack raises a node's local minimum fee by 25% per raise event up to 256 * 1,000,000, i.e. a 10 PFT minimum per reference transaction under extreme local load. The live node reports load_factor 256 (no load). Crucially, the load fee is per-node: a transaction must satisfy the load-scaled minimum of a majority of validators, so loading one node does not raise the network minimum.",
+   "remediation": "No action. Note for operators: local load shedding protects individual nodes; network-wide fee response still depends on the shared escalation path.",
+   "evidence": "fixtures/source-excerpts/LoadFeeTrack-raise-lower-scale.txt; outputs/server_state.json; claim C-18"
+  },
+  {
+   "id": "F-11",
+   "severity": "MEDIUM",
+   "status": "SPECIFIED",
+   "title": "Slow consensus halves the cheap-transaction allowance, hurting legitimate users too",
+   "detail": "When consensus is slow, FeeMetrics::update cuts txnsExpected by 50% per slow ledger (floor 32). A spam burst that slows consensus therefore shrinks the number of transactions admitted at the base fee for everyone, including legitimate users, until healthy ledgers rebuild the allowance. The defence and the collateral damage are the same mechanism.",
+   "remediation": "Monitor txnsExpected (reported as expected_ledger_size) as a health signal during incidents; a drop toward 32 during a burst indicates consensus is slowing, not just that fees are rising.",
+   "evidence": "fixtures/source-excerpts/TxQ-FeeMetrics-update-scaleFeeLevel.txt (TxQ.cpp:108-124); outputs/derived/escalation-model.json (sustained_load_dynamics)"
+  },
+  {
+   "id": "F-12",
+   "severity": "LOW",
+   "status": "MEASURED",
+   "title": "Fee-burn accounting reconciles: no anomaly in total supply",
+   "detail": "total_coins in the validated ledger is 99,999,999,966,545,876 drops against the 100,000,000,000,000,000-drop genesis supply, i.e. 33,454,124 drops (33.454124 PFT) burned in fees to date. The figure is consistent with a network that has processed very few transactions at 10 drops each plus the historical load the explorer reports.",
+   "remediation": "None. Re-check total_coins at each future probe as a supply-integrity control.",
+   "evidence": "outputs/ledger_current.json (total_coins); outputs/derived/live-fee-market.json (burned_pft)"
+  }
+ ]
+}
