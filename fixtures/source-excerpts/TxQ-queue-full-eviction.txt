@@ -1,0 +1,97 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/detail/TxQ.cpp
+# lines: 1240-1330 (1-based, verified with grep -n)
+# ----
+1240:     // If the queue is full, decide whether to drop the current
+1241:     // transaction or the last transaction for the account with
+1242:     // the lowest fee.
+1243:     if (!replacedTxIter && isFull())
+1244:     {
+1245:         auto lastRIter = byFee_.rbegin();
+1246:         while (lastRIter != byFee_.rend() && lastRIter->account == account)
+1247:         {
+1248:             ++lastRIter;
+1249:         }
+1250:         if (lastRIter == byFee_.rend())
+1251:         {
+1252:             // The only way this condition can happen is if the entire
+1253:             // queue is filled with transactions from this account. This
+1254:             // is impossible with default settings - minimum queue size
+1255:             // is 2000, and an account can only have 10 transactions
+1256:             // queued. However, it can occur if settings are changed,
+1257:             // and there is unit test coverage.
+1258:             JLOG(j_.info())
+1259:                 << "Queue is full, and transaction " << transactionID
+1260:                 << " would kick a transaction from the same account ("
+1261:                 << account << ") out of the queue.";
+1262:             return {telCAN_NOT_QUEUE_FULL, false};
+1263:         }
+1264:         auto const& endAccount = byAccount_.at(lastRIter->account);
+1265:         auto endEffectiveFeeLevel = [&]() {
+1266:             // Compute the average of all the txs for the endAccount,
+1267:             // but only if the last tx in the queue has a lower fee
+1268:             // level than this candidate tx.
+1269:             if (lastRIter->feeLevel > feeLevelPaid ||
+1270:                 endAccount.transactions.size() == 1)
+1271:                 return lastRIter->feeLevel;
+1272: 
+1273:             constexpr FeeLevel64 max{std::numeric_limits<std::uint64_t>::max()};
+1274:             auto endTotal = std::accumulate(
+1275:                 endAccount.transactions.begin(),
+1276:                 endAccount.transactions.end(),
+1277:                 std::pair<FeeLevel64, FeeLevel64>(0, 0),
+1278:                 [&](auto const& total,
+1279:                     auto const& txn) -> std::pair<FeeLevel64, FeeLevel64> {
+1280:                     // Check for overflow.
+1281:                     auto next =
+1282:                         txn.second.feeLevel / endAccount.transactions.size();
+1283:                     auto mod =
+1284:                         txn.second.feeLevel % endAccount.transactions.size();
+1285:                     if (total.first >= max - next || total.second >= max - mod)
+1286:                         return {max, FeeLevel64{0}};
+1287: 
+1288:                     return {total.first + next, total.second + mod};
+1289:                 });
+1290:             return endTotal.first +
+1291:                 endTotal.second / endAccount.transactions.size();
+1292:         }();
+1293:         if (feeLevelPaid > endEffectiveFeeLevel)
+1294:         {
+1295:             // The queue is full, and this transaction is more
+1296:             // valuable, so kick out the cheapest transaction.
+1297:             auto dropRIter = endAccount.transactions.rbegin();
+1298:             XRPL_ASSERT(
+1299:                 dropRIter->second.account == lastRIter->account,
+1300:                 "ripple::TxQ::apply : cheapest transaction found");
+1301:             JLOG(j_.info())
+1302:                 << "Removing last item of account " << lastRIter->account
+1303:                 << " from queue with average fee of " << endEffectiveFeeLevel
+1304:                 << " in favor of " << transactionID << " with fee of "
+1305:                 << feeLevelPaid;
+1306:             erase(byFee_.iterator_to(dropRIter->second));
+1307:         }
+1308:         else
+1309:         {
+1310:             JLOG(j_.info())
+1311:                 << "Queue is full, and transaction " << transactionID
+1312:                 << " fee is lower than end item's account average fee";
+1313:             return {telCAN_NOT_QUEUE_FULL, false};
+1314:         }
+1315:     }
+1316: 
+1317:     // Hold the transaction in the queue.
+1318:     if (replacedTxIter)
+1319:     {
+1320:         replacedTxIter = removeFromByFee(replacedTxIter, tx);
+1321:     }
+1322: 
+1323:     if (!accountIsInQueue)
+1324:     {
+1325:         // Create a new TxQAccount object and add the byAccount lookup.
+1326:         [[maybe_unused]] bool created = false;
+1327:         std::tie(accountIter, created) =
+1328:             byAccount_.emplace(account, TxQAccount(tx));
+1329:         XRPL_ASSERT(created, "ripple::TxQ::apply : account created");
+1330:     }

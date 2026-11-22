@@ -1,0 +1,18 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/NetworkOPs.cpp
+# lines: 2985-2996 (1-based, verified with grep -n)
+# ----
+2985:     }
+2986: 
+2987:     accounting_.json(info);
+2988:     info[jss::uptime] = UptimeClock::now().time_since_epoch().count();
+2989:     info[jss::jq_trans_overflow] =
+2990:         std::to_string(app_.overlay().getJqTransOverflow());
+2991:     info[jss::peer_disconnects] =
+2992:         std::to_string(app_.overlay().getPeerDisconnect());
+2993:     info[jss::peer_disconnects_resources] =
+2994:         std::to_string(app_.overlay().getPeerDisconnectCharges());
+2995: 
+2996:     // This array must be sorted in increasing order.

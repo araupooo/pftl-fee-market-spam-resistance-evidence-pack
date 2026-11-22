@@ -1,0 +1,82 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/tx/detail/Transactor.cpp
+# lines: 370-445 (1-based, verified with grep -n)
+# ----
+370: Transactor::minimumFee(
+371:     Application& app,
+372:     XRPAmount baseFee,
+373:     Fees const& fees,
+374:     ApplyFlags flags)
+375: {
+376:     return scaleFeeLoad(baseFee, app.getFeeTrack(), fees, flags & tapUNLIMITED);
+377: }
+378: 
+379: TER
+380: Transactor::checkFee(PreclaimContext const& ctx, XRPAmount baseFee)
+381: {
+382:     if (!ctx.tx[sfFee].native())
+383:         return temBAD_FEE;
+384: 
+385:     auto const feePaid = ctx.tx[sfFee].xrp();
+386: 
+387:     if (ctx.flags & tapBATCH)
+388:     {
+389:         if (feePaid == beast::zero)
+390:             return tesSUCCESS;
+391: 
+392:         JLOG(ctx.j.trace()) << "Batch: Fee must be zero.";
+393:         return temBAD_FEE;  // LCOV_EXCL_LINE
+394:     }
+395: 
+396:     if (!isLegalAmount(feePaid) || feePaid < beast::zero)
+397:         return temBAD_FEE;
+398: 
+399:     // Only check fee is sufficient when the ledger is open.
+400:     if (ctx.view.open())
+401:     {
+402:         auto const feeDue =
+403:             minimumFee(ctx.app, baseFee, ctx.view.fees(), ctx.flags);
+404: 
+405:         if (feePaid < feeDue)
+406:         {
+407:             JLOG(ctx.j.trace())
+408:                 << "Insufficient fee paid: " << to_string(feePaid) << "/"
+409:                 << to_string(feeDue);
+410:             return telINSUF_FEE_P;
+411:         }
+412:     }
+413: 
+414:     if (feePaid == beast::zero)
+415:         return tesSUCCESS;
+416: 
+417:     auto const id = ctx.tx.isFieldPresent(sfDelegate)
+418:         ? ctx.tx.getAccountID(sfDelegate)
+419:         : ctx.tx.getAccountID(sfAccount);
+420:     auto const sle = ctx.view.read(keylet::account(id));
+421:     if (!sle)
+422:         return terNO_ACCOUNT;
+423: 
+424:     auto const balance = (*sle)[sfBalance].xrp();
+425: 
+426:     if (balance < feePaid)
+427:     {
+428:         JLOG(ctx.j.trace())
+429:             << "Insufficient balance:" << " balance=" << to_string(balance)
+430:             << " paid=" << to_string(feePaid);
+431: 
+432:         if ((balance > beast::zero) && !ctx.view.open())
+433:         {
+434:             // Closed ledger, non-zero balance, less than fee
+435:             return tecINSUFF_FEE;
+436:         }
+437: 
+438:         return terINSUF_FEE_B;
+439:     }
+440: 
+441:     return tesSUCCESS;
+442: }
+443: 
+444: TER
+445: Transactor::payFee()

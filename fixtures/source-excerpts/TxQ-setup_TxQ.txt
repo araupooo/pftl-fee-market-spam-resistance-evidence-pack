@@ -1,0 +1,75 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/detail/TxQ.cpp
+# lines: 1914-1982 (1-based, verified with grep -n)
+# ----
+1914: TxQ::Setup
+1915: setup_TxQ(Config const& config)
+1916: {
+1917:     TxQ::Setup setup;
+1918:     auto const& section = config.section("transaction_queue");
+1919:     set(setup.ledgersInQueue, "ledgers_in_queue", section);
+1920:     set(setup.queueSizeMin, "minimum_queue_size", section);
+1921:     set(setup.retrySequencePercent, "retry_sequence_percent", section);
+1922:     set(setup.minimumEscalationMultiplier,
+1923:         "minimum_escalation_multiplier",
+1924:         section);
+1925:     set(setup.minimumTxnInLedger, "minimum_txn_in_ledger", section);
+1926:     set(setup.minimumTxnInLedgerSA,
+1927:         "minimum_txn_in_ledger_standalone",
+1928:         section);
+1929:     set(setup.targetTxnInLedger, "target_txn_in_ledger", section);
+1930:     std::uint32_t max;
+1931:     if (set(max, "maximum_txn_in_ledger", section))
+1932:     {
+1933:         if (max < setup.minimumTxnInLedger)
+1934:         {
+1935:             Throw<std::runtime_error>(
+1936:                 "The minimum number of low-fee transactions allowed "
+1937:                 "per ledger (minimum_txn_in_ledger) exceeds "
+1938:                 "the maximum number of low-fee transactions allowed per "
+1939:                 "ledger (maximum_txn_in_ledger).");
+1940:         }
+1941:         if (max < setup.minimumTxnInLedgerSA)
+1942:         {
+1943:             Throw<std::runtime_error>(
+1944:                 "The minimum number of low-fee transactions allowed "
+1945:                 "per ledger (minimum_txn_in_ledger_standalone) exceeds "
+1946:                 "the maximum number of low-fee transactions allowed per "
+1947:                 "ledger (maximum_txn_in_ledger).");
+1948:         }
+1949: 
+1950:         setup.maximumTxnInLedger.emplace(max);
+1951:     }
+1952: 
+1953:     /* The math works as expected for any value up to and including
+1954:        MAXINT, but put a reasonable limit on this percentage so that
+1955:        the factor can't be configured to render escalation effectively
+1956:        moot. (There are other ways to do that, including
+1957:        minimum_txn_in_ledger.)
+1958:     */
+1959:     set(setup.normalConsensusIncreasePercent,
+1960:         "normal_consensus_increase_percent",
+1961:         section);
+1962:     setup.normalConsensusIncreasePercent =
+1963:         std::clamp(setup.normalConsensusIncreasePercent, 0u, 1000u);
+1964: 
+1965:     /* If this percentage is outside of the 0-100 range, the results
+1966:        are nonsensical (uint overflows happen, so the limit grows
+1967:        instead of shrinking). 0 is not recommended.
+1968:     */
+1969:     set(setup.slowConsensusDecreasePercent,
+1970:         "slow_consensus_decrease_percent",
+1971:         section);
+1972:     setup.slowConsensusDecreasePercent =
+1973:         std::clamp(setup.slowConsensusDecreasePercent, 0u, 100u);
+1974: 
+1975:     set(setup.maximumTxnPerAccount, "maximum_txn_per_account", section);
+1976:     set(setup.minimumLastLedgerBuffer, "minimum_last_ledger_buffer", section);
+1977: 
+1978:     setup.standAlone = config.standalone();
+1979:     return setup;
+1980: }
+1981: 
+1982: }  // namespace ripple

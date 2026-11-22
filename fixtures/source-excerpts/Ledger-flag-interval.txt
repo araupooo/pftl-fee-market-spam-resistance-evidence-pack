@@ -1,0 +1,17 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/ledger/Ledger.h
+# lines: 420-430 (1-based, verified with grep -n)
+# ----
+420:     beast::Journal j_;
+421: };
+422: 
+423: /** A ledger wrapped in a CachedView. */
+424: using CachedLedger = CachedView<Ledger>;
+425: 
+426: std::uint32_t constexpr FLAG_LEDGER_INTERVAL = 256;
+427: /** Returns true if the given ledgerIndex is a flag ledgerIndex */
+428: bool
+429: isFlagLedger(LedgerIndex seq);
+430: 

@@ -1,0 +1,64 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/FeeEscalation.md
+# lines: 224-281 (1-based, verified with grep -n)
+# ----
+224: ### Other Constants
+225: 
+226: - _Base fee transaction limit per ledger_. The minimum value of 5 was
+227:   chosen to ensure the limit never gets so small that the ledger becomes
+228:   unusable. The "target" value of 50 was chosen so the limit never gets large
+229:   enough to invite abuse, but keeps up if the network stays healthy and
+230:   active. These exact values were chosen experimentally, and can easily
+231:   change in the future.
+232: - _Expected ledger size growth and reduction percentages_. The growth
+233:   value of 20% was chosen to allow the limit to grow quickly as load
+234:   increases, but not so quickly as to allow bad actors to run unrestricted.
+235:   The reduction value of 50% was chosen to cause the limit to drop
+236:   significantly, but not so drastically that the limit cannot quickly
+237:   recover if the problem is temporary. These exact values were chosen
+238:   experimentally, and can easily change in the future.
+239: - _Minimum `lastLedgerMedianFeeLevel`_. The value of 500 was chosen to
+240:   ensure that the first escalated fee was more significant and noticable
+241:   than what the default would allow. This exact value was chosen
+242:   experimentally, and can easily change in the future.
+243: - _Transaction queue size limit_. The limit is computed based on the
+244:   base fee transaction limit per ledger, so that the queue can grow
+245:   automatically as the network's performance improves, allowing
+246:   more transactions per second, and thus more transactions per ledger
+247:   to process successfully. The limit of 20 ledgers was used to provide
+248:   a balance between resource (specifically memory) usage, and giving
+249:   transactions a realistic chance to be processed. The minimum size of
+250:   2000 transactions was chosen to allow a decent functional backlog during
+251:   network congestion conditions. These exact values were
+252:   chosen experimentally, and can easily change in the future.
+253: - _Maximum retries_. A transaction in the queue can attempt to apply
+254:   to the open ledger, but get a retry (`ter`) code up to 10 times, at
+255:   which point, it will be removed from the queue and dropped. The
+256:   value was chosen to be large enough to allow temporary failures to clear
+257:   up, but small enough that the queue doesn't fill up with stale
+258:   transactions which prevent lower fee level, but more likely to succeed,
+259:   transactions from queuing.
+260: - _Maximum transactions per account_. A single account can have up to 10
+261:   transactions in the queue at any given time. This is primarily to
+262:   mitigate the lost cost of broadcasting multiple transactions if one of
+263:   the earlier ones fails or is otherwise removed from the queue without
+264:   being applied to the open ledger. The value was chosen arbitrarily, and
+265:   can easily change in the future.
+266: - _Minimum last ledger sequence buffer_. If a transaction has a
+267:   `LastLedgerSequence` value, and cannot be processed into the open
+268:   ledger, that `LastLedgerSequence` must be at least 2 more than the
+269:   sequence number of the open ledger to be considered for the queue. The
+270:   value was chosen to provide a balance between letting the user control
+271:   the lifespan of the transaction, and giving a queued transaction a
+272:   chance to get processed out of the queue before getting discarded,
+273:   particularly since it may have dependent transactions also in the queue,
+274:   which will never succeed if this one is discarded.
+275: - _Replaced transaction fee increase_. Any transaction in the queue can be
+276:   replaced by another transaction with the same sequence number and at
+277:   least a 25% higher fee level. The 25% increase is intended to cover the
+278:   resource cost incurred by broadcasting the original transaction to the
+279:   network. This value was chosen experimentally, and can easily change in
+280:   the future.
+281: 

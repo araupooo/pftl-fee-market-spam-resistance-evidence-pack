@@ -1,0 +1,33 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: include/xrpl/resource/detail/Tuning.h
+# lines: 24-50 (1-based, verified with grep -n)
+# ----
+24: 
+25: namespace ripple {
+26: namespace Resource {
+27: 
+28: /** Tunable constants. */
+29: enum {
+30:     // Balance at which a warning is issued
+31:     warningThreshold = 5000
+32: 
+33:     // Balance at which the consumer is disconnected
+34:     ,
+35:     dropThreshold = 25000
+36: 
+37:     // The number of seconds in the exponential decay window
+38:     // (This should be a power of two)
+39:     ,
+40:     decayWindowSeconds = 32
+41: 
+42:     // The minimum balance required in order to include a load source in gossip
+43:     ,
+44:     minimumGossipBalance = 1000
+45: };
+46: 
+47: // The number of seconds until an inactive table item is removed
+48: std::chrono::seconds constexpr secondsUntilExpiration{300};
+49: 
+50: // Number of seconds until imported gossip expires

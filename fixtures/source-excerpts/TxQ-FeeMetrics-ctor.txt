@@ -1,0 +1,52 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/TxQ.h
+# lines: 375-420 (1-based, verified with grep -n)
+# ----
+375:         as the open ledger grows.
+376:     */
+377:     class FeeMetrics
+378:     {
+379:     private:
+380:         /// Minimum value of txnsExpected.
+381:         std::size_t const minimumTxnCount_;
+382:         /// Number of transactions per ledger that fee escalation "works
+383:         /// towards".
+384:         std::size_t const targetTxnCount_;
+385:         /// Maximum value of txnsExpected
+386:         std::optional<std::size_t> const maximumTxnCount_;
+387:         /// Number of transactions expected per ledger.
+388:         /// One more than this value will be accepted
+389:         /// before escalation kicks in.
+390:         std::size_t txnsExpected_;
+391:         /// Recent history of transaction counts that
+392:         /// exceed the targetTxnCount_
+393:         boost::circular_buffer<std::size_t> recentTxnCounts_;
+394:         /// Based on the median fee of the LCL. Used
+395:         /// when fee escalation kicks in.
+396:         FeeLevel64 escalationMultiplier_;
+397:         /// Journal
+398:         beast::Journal const j_;
+399: 
+400:     public:
+401:         /// Constructor
+402:         FeeMetrics(Setup const& setup, beast::Journal j)
+403:             : minimumTxnCount_(
+404:                   setup.standAlone ? setup.minimumTxnInLedgerSA
+405:                                    : setup.minimumTxnInLedger)
+406:             , targetTxnCount_(
+407:                   setup.targetTxnInLedger < minimumTxnCount_
+408:                       ? minimumTxnCount_
+409:                       : setup.targetTxnInLedger)
+410:             , maximumTxnCount_(
+411:                   setup.maximumTxnInLedger
+412:                       ? *setup.maximumTxnInLedger < targetTxnCount_
+413:                           ? targetTxnCount_
+414:                           : *setup.maximumTxnInLedger
+415:                       : std::optional<std::size_t>(std::nullopt))
+416:             , txnsExpected_(minimumTxnCount_)
+417:             , recentTxnCounts_(setup.ledgersInQueue)
+418:             , escalationMultiplier_(setup.minimumEscalationMultiplier)
+419:             , j_(j)
+420:         {

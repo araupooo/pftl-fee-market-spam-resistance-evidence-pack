@@ -1,0 +1,74 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/FeeVoteImpl.cpp
+# lines: 25-92 (1-based, verified with grep -n)
+# ----
+25: #include <xrpl/protocol/st.h>
+26: 
+27: namespace ripple {
+28: 
+29: namespace detail {
+30: 
+31: class VotableValue
+32: {
+33: private:
+34:     using value_type = XRPAmount;
+35:     value_type const current_;  // The current setting
+36:     value_type const target_;   // The setting we want
+37:     std::map<value_type, int> voteMap_;
+38: 
+39: public:
+40:     VotableValue(value_type current, value_type target)
+41:         : current_(current), target_(target)
+42:     {
+43:         // Add our vote
+44:         ++voteMap_[target_];
+45:     }
+46: 
+47:     void
+48:     addVote(value_type vote)
+49:     {
+50:         ++voteMap_[vote];
+51:     }
+52: 
+53:     void
+54:     noVote()
+55:     {
+56:         addVote(current_);
+57:     }
+58: 
+59:     value_type
+60:     current() const
+61:     {
+62:         return current_;
+63:     }
+64: 
+65:     std::pair<value_type, bool>
+66:     getVotes() const;
+67: };
+68: 
+69: auto
+70: VotableValue::getVotes() const -> std::pair<value_type, bool>
+71: {
+72:     value_type ourVote = current_;
+73:     int weight = 0;
+74:     for (auto const& [key, val] : voteMap_)
+75:     {
+76:         // Take most voted value between current and target, inclusive
+77:         if ((key <= std::max(target_, current_)) &&
+78:             (key >= std::min(target_, current_)) && (val > weight))
+79:         {
+80:             ourVote = key;
+81:             weight = val;
+82:         }
+83:     }
+84: 
+85:     return {ourVote, ourVote != current_};
+86: }
+87: 
+88: }  // namespace detail
+89: 
+90: //------------------------------------------------------------------------------
+91: 
+92: class FeeVoteImpl : public FeeVote

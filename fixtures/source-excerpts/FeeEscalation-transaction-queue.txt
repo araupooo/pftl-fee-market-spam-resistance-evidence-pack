@@ -1,0 +1,72 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/FeeEscalation.md
+# lines: 90-155 (1-based, verified with grep -n)
+# ----
+90: ## Transaction Queue
+91: 
+92: An integral part of making fee escalation work for users of the network
+93: is the transaction queue. The queue allows legitimate transactions to be
+94: considered by the network for future ledgers if the escalated open
+95: ledger fee gets too high. This allows users to submit low priority
+96: transactions with a low fee, and wait for high fees to drop. It also
+97: allows legitimate users to continue submitting transactions during high
+98: traffic periods, and give those transactions a much better chance to
+99: succeed.
+100: 
+101: 1. If an incoming transaction meets both the base [fee
+102:    level](#fee-level) and the [load fee](#load-fee) minimum, but does not have a high
+103:    enough [fee level](#fee-level) to immediately go into the open ledger,
+104:    it is instead put into the queue and broadcast to peers. Each peer will
+105:    then make an independent decision about whether to put the transaction
+106:    into its open ledger or the queue. In principle, peers with identical
+107:    open ledgers will come to identical decisions. Any discrepancies will be
+108:    resolved as usual during consensus.
+109: 2. When consensus completes, the open ledger limit is adjusted, and
+110:    the required [fee level](#fee-level) drops back to the base
+111:    [fee level](#fee-level). Before the ledger is made available to
+112:    external transactions, transactions are applied from the queue to the
+113:    ledger from highest [fee level](#fee-level) to lowest. These transactions
+114:    count against the open ledger limit, so the required [fee level](#fee-level)
+115:    may start rising during this process.
+116: 3. Once the queue is empty, or the required [fee level](#fee-level)
+117:    rises too high for the remaining transactions in the queue, the ledger
+118:    is opened up for normal transaction processing.
+119: 4. A transaction in the queue can stay there indefinitely in principle,
+120:    but in practice, either
+121: 
+122: - it will eventually get applied to the ledger,
+123: - it will attempt to apply to the ledger and fail,
+124: - it will attempt to apply to the ledger and retry [10
+125:   times](#other-constants),
+126: - its last ledger sequence number will expire,
+127: - the user will replace it by submitting another transaction with the same
+128:   sequence number and at least a [25% higher fee](#other-constants), or
+129: - it will get dropped when the queue fills up with more valuable transactions.
+130:   The size limit is computed dynamically, and can hold transactions for
+131:   the next [20 ledgers](#other-constants) (restricted to a minimum of
+132:   [2000 transactions](#other-constants)). The lower the transaction's
+133:   fee, the more likely that it will get dropped if the network is busy.
+134: 
+135: If a transaction is submitted for an account with one or more transactions
+136: already in the queue, and a sequence number that is sequential with the other
+137: transactions in the queue for that account, it will be considered
+138: for the queue if it meets these additional criteria:
+139: 
+140: - the account has fewer than [10](#other-constants) transactions
+141:   already in the queue.
+142: - all other queued transactions for that account, in the case where
+143:   they spend the maximum possible XRP, leave enough XRP balance to pay
+144:   the fee,
+145: - the total fees for the other queued transactions are less than both
+146:   the network's minimum reserve and the account's XRP balance, and
+147: - none of the prior queued transactions affect the ability of subsequent
+148:   transactions to claim a fee.
+149: 
+150: Currently, there is an additional restriction that the queue cannot work with
+151: transactions using the `sfPreviousTxnID` or `sfAccountTxnID` fields.
+152: `sfPreviousTxnID` is deprecated and shouldn't be used anyway. Future
+153: development will make the queue aware of `sfAccountTxnID` mechanisms.
+154: 
+155: ## Technical Details

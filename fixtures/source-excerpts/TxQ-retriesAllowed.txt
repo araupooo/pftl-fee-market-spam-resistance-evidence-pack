@@ -1,0 +1,17 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/TxQ.h
+# lines: 575-585 (1-based, verified with grep -n)
+# ----
+575:             essentially arbitrary. It should be large enough to
+576:             allow temporary failures to clear up, but small enough
+577:             that the queue doesn't fill up with stale transactions
+578:             which prevent lower fee level transactions from queuing.
+579:         */
+580:         static constexpr int retriesAllowed = 10;
+581: 
+582:         /** The hash of the parent ledger.
+583: 
+584:            This is used to pseudo-randomize the transaction order when
+585:            populating byFee_, by XORing it with the transaction hash (txID).

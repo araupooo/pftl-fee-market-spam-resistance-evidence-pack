@@ -1,0 +1,117 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/detail/TxQ.cpp
+# lines: 85-195 (1-based, verified with grep -n)
+# ----
+85:     Application& app,
+86:     ReadView const& view,
+87:     bool timeLeap,
+88:     TxQ::Setup const& setup)
+89: {
+90:     std::vector<FeeLevel64> feeLevels;
+91:     auto const txBegin = view.txs.begin();
+92:     auto const txEnd = view.txs.end();
+93:     auto const size = std::distance(txBegin, txEnd);
+94:     feeLevels.reserve(size);
+95:     std::for_each(txBegin, txEnd, [&](auto const& tx) {
+96:         feeLevels.push_back(getFeeLevelPaid(view, *tx.first));
+97:     });
+98:     std::sort(feeLevels.begin(), feeLevels.end());
+99:     XRPL_ASSERT(
+100:         size == feeLevels.size(),
+101:         "ripple::TxQ::FeeMetrics::update : fee levels size");
+102: 
+103:     JLOG((timeLeap ? j_.warn() : j_.debug()))
+104:         << "Ledger " << view.info().seq << " has " << size << " transactions. "
+105:         << "Ledgers are processing " << (timeLeap ? "slowly" : "as expected")
+106:         << ". Expected transactions is currently " << txnsExpected_
+107:         << " and multiplier is " << escalationMultiplier_;
+108: 
+109:     if (timeLeap)
+110:     {
+111:         // Ledgers are taking to long to process,
+112:         // so clamp down on limits.
+113:         auto const cutPct = 100 - setup.slowConsensusDecreasePercent;
+114:         // upperLimit must be >= minimumTxnCount_ or std::clamp can give
+115:         // unexpected results
+116:         auto const upperLimit = std::max<std::uint64_t>(
+117:             mulDiv(txnsExpected_, cutPct, 100).value_or(ripple::muldiv_max),
+118:             minimumTxnCount_);
+119:         txnsExpected_ = std::clamp<std::uint64_t>(
+120:             mulDiv(size, cutPct, 100).value_or(ripple::muldiv_max),
+121:             minimumTxnCount_,
+122:             upperLimit);
+123:         recentTxnCounts_.clear();
+124:     }
+125:     else if (size > txnsExpected_ || size > targetTxnCount_)
+126:     {
+127:         recentTxnCounts_.push_back(
+128:             mulDiv(size, 100 + setup.normalConsensusIncreasePercent, 100)
+129:                 .value_or(ripple::muldiv_max));
+130:         auto const iter =
+131:             std::max_element(recentTxnCounts_.begin(), recentTxnCounts_.end());
+132:         BOOST_ASSERT(iter != recentTxnCounts_.end());
+133:         auto const next = [&] {
+134:             // Grow quickly: If the max_element is >= the
+135:             // current size limit, use it.
+136:             if (*iter >= txnsExpected_)
+137:                 return *iter;
+138:             // Shrink slowly: If the max_element is < the
+139:             // current size limit, use a limit that is
+140:             // 90% of the way from max_element to the
+141:             // current size limit.
+142:             return (txnsExpected_ * 9 + *iter) / 10;
+143:         }();
+144:         // Ledgers are processing in a timely manner,
+145:         // so keep the limit high, but don't let it
+146:         // grow without bound.
+147:         txnsExpected_ = std::min(next, maximumTxnCount_.value_or(next));
+148:     }
+149: 
+150:     if (!size)
+151:     {
+152:         escalationMultiplier_ = setup.minimumEscalationMultiplier;
+153:     }
+154:     else
+155:     {
+156:         // In the case of an odd number of elements, this
+157:         // evaluates to the middle element; for an even
+158:         // number of elements, it will add the two elements
+159:         // on either side of the "middle" and average them.
+160:         escalationMultiplier_ =
+161:             (feeLevels[size / 2] + feeLevels[(size - 1) / 2] + FeeLevel64{1}) /
+162:             2;
+163:         escalationMultiplier_ =
+164:             std::max(escalationMultiplier_, setup.minimumEscalationMultiplier);
+165:     }
+166:     JLOG(j_.debug()) << "Expected transactions updated to " << txnsExpected_
+167:                      << " and multiplier updated to " << escalationMultiplier_;
+168: 
+169:     return size;
+170: }
+171: 
+172: FeeLevel64
+173: TxQ::FeeMetrics::scaleFeeLevel(Snapshot const& snapshot, OpenView const& view)
+174: {
+175:     // Transactions in the open ledger so far
+176:     auto const current = view.txCount();
+177: 
+178:     auto const target = snapshot.txnsExpected;
+179:     auto const multiplier = snapshot.escalationMultiplier;
+180: 
+181:     // Once the open ledger bypasses the target,
+182:     // escalate the fee quickly.
+183:     if (current > target)
+184:     {
+185:         // Compute escalated fee level
+186:         // Don't care about the overflow flag
+187:         return mulDiv(multiplier, current * current, target * target)
+188:             .value_or(static_cast<FeeLevel64>(ripple::muldiv_max));
+189:     }
+190: 
+191:     return baseLevel;
+192: }
+193: 
+194: namespace detail {
+195: 

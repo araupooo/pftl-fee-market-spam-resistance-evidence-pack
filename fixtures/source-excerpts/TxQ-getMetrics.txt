@@ -1,0 +1,30 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/detail/TxQ.cpp
+# lines: 1777-1800 (1-based, verified with grep -n)
+# ----
+1777: TxQ::Metrics
+1778: TxQ::getMetrics(OpenView const& view) const
+1779: {
+1780:     Metrics result;
+1781: 
+1782:     std::lock_guard lock(mutex_);
+1783: 
+1784:     auto const snapshot = feeMetrics_.getSnapshot();
+1785: 
+1786:     result.txCount = byFee_.size();
+1787:     result.txQMaxSize = maxSize_;
+1788:     result.txInLedger = view.txCount();
+1789:     result.txPerLedger = snapshot.txnsExpected;
+1790:     result.referenceFeeLevel = baseLevel;
+1791:     result.minProcessingFeeLevel =
+1792:         isFull() ? byFee_.rbegin()->feeLevel + FeeLevel64{1} : baseLevel;
+1793:     result.medFeeLevel = snapshot.escalationMultiplier;
+1794:     result.openLedgerFeeLevel = FeeMetrics::scaleFeeLevel(snapshot, view);
+1795: 
+1796:     return result;
+1797: }
+1798: 
+1799: TxQ::FeeAndSeq
+1800: TxQ::getTxRequiredFeeAndSeq(

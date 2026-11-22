@@ -1,0 +1,60 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/detail/TxQ.cpp
+# lines: 1860-1913 (1-based, verified with grep -n)
+# ----
+1860: TxQ::doRPC(Application& app) const
+1861: {
+1862:     auto const view = app.openLedger().current();
+1863:     if (!view)
+1864:     {
+1865:         BOOST_ASSERT(false);
+1866:         return {};
+1867:     }
+1868: 
+1869:     auto const metrics = getMetrics(*view);
+1870: 
+1871:     Json::Value ret(Json::objectValue);
+1872: 
+1873:     auto& levels = ret[jss::levels] = Json::objectValue;
+1874: 
+1875:     ret[jss::ledger_current_index] = view->info().seq;
+1876:     ret[jss::expected_ledger_size] = std::to_string(metrics.txPerLedger);
+1877:     ret[jss::current_ledger_size] = std::to_string(metrics.txInLedger);
+1878:     ret[jss::current_queue_size] = std::to_string(metrics.txCount);
+1879:     if (metrics.txQMaxSize)
+1880:         ret[jss::max_queue_size] = std::to_string(*metrics.txQMaxSize);
+1881: 
+1882:     levels[jss::reference_level] = to_string(metrics.referenceFeeLevel);
+1883:     levels[jss::minimum_level] = to_string(metrics.minProcessingFeeLevel);
+1884:     levels[jss::median_level] = to_string(metrics.medFeeLevel);
+1885:     levels[jss::open_ledger_level] = to_string(metrics.openLedgerFeeLevel);
+1886: 
+1887:     auto const baseFee = view->fees().base;
+1888:     // If the base fee is 0 drops, but escalation has kicked in, treat the
+1889:     // base fee as if it is 1 drop, which makes the rest of the math
+1890:     // work.
+1891:     auto const effectiveBaseFee = [&baseFee, &metrics]() {
+1892:         if (!baseFee && metrics.openLedgerFeeLevel != metrics.referenceFeeLevel)
+1893:             return XRPAmount{1};
+1894:         return baseFee;
+1895:     }();
+1896:     auto& drops = ret[jss::drops] = Json::Value();
+1897: 
+1898:     drops[jss::base_fee] = to_string(baseFee);
+1899:     drops[jss::median_fee] = to_string(toDrops(metrics.medFeeLevel, baseFee));
+1900:     drops[jss::minimum_fee] = to_string(toDrops(
+1901:         metrics.minProcessingFeeLevel,
+1902:         metrics.txCount >= metrics.txQMaxSize ? effectiveBaseFee : baseFee));
+1903:     auto openFee = toDrops(metrics.openLedgerFeeLevel, effectiveBaseFee);
+1904:     if (effectiveBaseFee &&
+1905:         toFeeLevel(openFee, effectiveBaseFee) < metrics.openLedgerFeeLevel)
+1906:         openFee += 1;
+1907:     drops[jss::open_ledger_fee] = to_string(openFee);
+1908: 
+1909:     return ret;
+1910: }
+1911: 
+1912: //////////////////////////////////////////////////////////////////////////
+1913: 

@@ -1,0 +1,107 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/TxQ.h
+# lines: 60-160 (1-based, verified with grep -n)
+# ----
+60: class TxQ
+61: {
+62: public:
+63:     /// Fee level for single-signed reference transaction.
+64:     static constexpr FeeLevel64 baseLevel{256};
+65: 
+66:     /**
+67:         Structure used to customize @ref TxQ behavior.
+68:     */
+69:     struct Setup
+70:     {
+71:         /// Default constructor
+72:         explicit Setup() = default;
+73: 
+74:         /** Number of ledgers' worth of transactions to allow
+75:             in the queue. For example, if the last ledger had
+76:             150 transactions, then up to 3000 transactions can
+77:             be queued.
+78: 
+79:             Can be overridden by @ref queueSizeMin
+80:         */
+81:         std::size_t ledgersInQueue = 20;
+82:         /** The smallest limit the queue is allowed.
+83: 
+84:             Will allow more than `ledgersInQueue` in the queue
+85:             if ledgers are small.
+86:         */
+87:         std::size_t queueSizeMin = 2000;
+88:         /** Extra percentage required on the fee level of a queued
+89:             transaction to replace that transaction with another
+90:             with the same SeqProxy.
+91: 
+92:             If queued transaction for account "Alice" with seq 45
+93:             has a fee level of 512, a replacement transaction for
+94:             "Alice" with seq 45 must have a fee level of at least
+95:             512 * (1 + 0.25) = 640 to be considered.
+96:         */
+97:         std::uint32_t retrySequencePercent = 25;
+98:         /// Minimum value of the escalation multiplier, regardless
+99:         /// of the prior ledger's median fee level.
+100:         FeeLevel64 minimumEscalationMultiplier = baseLevel * 500;
+101:         /// Minimum number of transactions to allow into the ledger
+102:         /// before escalation, regardless of the prior ledger's size.
+103:         std::uint32_t minimumTxnInLedger = 32;
+104:         /// Like @ref minimumTxnInLedger for standalone mode.
+105:         /// Primarily so that tests don't need to worry about queuing.
+106:         std::uint32_t minimumTxnInLedgerSA = 1000;
+107:         /// Number of transactions per ledger that fee escalation "works
+108:         /// towards".
+109:         std::uint32_t targetTxnInLedger = 256;
+110:         /** Optional maximum allowed value of transactions per ledger before
+111:             fee escalation kicks in. By default, the maximum is an emergent
+112:             property of network, validator, and consensus performance. This
+113:             setting can override that behavior to prevent fee escalation from
+114:             allowing more than `maximumTxnInLedger` "cheap" transactions into
+115:             the open ledger.
+116: 
+117:             @todo eahennis. This setting seems to go against our goals and
+118:                 values. Can it be removed?
+119:         */
+120:         std::optional<std::uint32_t> maximumTxnInLedger;
+121:         /** When the ledger has more transactions than "expected", and
+122:             performance is humming along nicely, the expected ledger size
+123:             is updated to the previous ledger size plus this percentage.
+124: 
+125:             Calculations are subject to configured limits, and the recent
+126:             transactions counts buffer.
+127: 
+128:             Example: If the "expectation" is for 500 transactions, and a
+129:             ledger is validated normally with 501 transactions, then the
+130:             expected ledger size will be updated to 601.
+131:         */
+132:         std::uint32_t normalConsensusIncreasePercent = 20;
+133:         /** When consensus takes longer than appropriate, the expected
+134:             ledger size is updated to the lesser of the previous ledger
+135:             size and the current expected ledger size minus this
+136:             percentage.
+137: 
+138:             Calculations are subject to configured limits.
+139: 
+140:             Example: If the ledger has 15000 transactions, and it is
+141:             validated slowly, then the expected ledger size will be
+142:             updated to 7500. If there are only 6 transactions, the
+143:             expected ledger size will be updated to 5, assuming the
+144:             default minimum.
+145:         */
+146:         std::uint32_t slowConsensusDecreasePercent = 50;
+147:         /// Maximum number of transactions that can be queued by one account.
+148:         std::uint32_t maximumTxnPerAccount = 10;
+149:         /** Minimum difference between the current ledger sequence and a
+150:             transaction's `LastLedgerSequence` for the transaction to be
+151:             queueable. Decreases the chance a transaction will get queued
+152:             and broadcast only to expire before it gets a chance to be
+153:             processed.
+154:         */
+155:         std::uint32_t minimumLastLedgerBuffer = 2;
+156:         /// Use standalone mode behavior.
+157:         bool standAlone = false;
+158:     };
+159: 
+160:     /**

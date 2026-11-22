@@ -1,0 +1,96 @@
+# Pinned source excerpt
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: src/xrpld/app/misc/FeeEscalation.md
+# lines: 1-90 (1-based, verified with grep -n)
+# ----
+1: # Fees
+2: 
+3: Rippled's fee mechanism consists of several interrelated processes:
+4: 
+5: 1. [Rapid Fee escalation](#fee-escalation)
+6: 2. [The Transaction Queue](#transaction-queue)
+7: 
+8: ## Fee Escalation
+9: 
+10: The guiding principal of fee escalation is that when things are going
+11: smoothly, fees stay low, but as soon as high levels of traffic appear
+12: on the network, fees will grow quickly to extreme levels. This should
+13: dissuade malicious users from abusing the system, while giving
+14: legitimate users the ability to pay a higher fee to get high-priority
+15: transactions into the open ledger, even during unfavorable conditions.
+16: 
+17: How fees escalate:
+18: 
+19: 1. There is a base [fee level](#fee-level) of 256,
+20:    which is the minimum that a typical transaction
+21:    is required to pay. For a [reference
+22:    transaction](#reference-transaction), that corresponds to the
+23:    network base fee, which is currently 10 drops.
+24: 2. However, there is a limit on the number of transactions that
+25:    can get into an open ledger for that base fee level. The limit
+26:    will vary based on the [health](#consensus-health) of the
+27:    consensus process, but will be at least [5](#other-constants).
+28: 
+29: - If consensus stays [healthy](#consensus-health), the limit will
+30:   be the max of the number of transactions in the validated ledger
+31:   plus [20%](#other-constants) or the current limit until it gets
+32:   to [50](#other-constants), at which point, the limit will be the
+33:   largest number of transactions plus [20%](#other-constants)
+34:   in the last [20](#other-constants) validated ledgers which had
+35:   more than [50](#other-constants) transactions. Any time the limit
+36:   decreases (i.e. a large ledger is no longer recent), the limit will
+37:   decrease to the new largest value by 10% each time the ledger has
+38:   more than 50 transactions.
+39: - If consensus does not stay [healthy](#consensus-health),
+40:   the limit will clamp down to the smaller of the number of
+41:   transactions in the validated ledger minus [50%](#other-constants)
+42:   or the previous limit minus [50%](#other-constants).
+43: - The intended effect of these mechanisms is to allow as many base fee
+44:   level transactions to get into the ledger as possible while the
+45:   network is [healthy](#consensus-health), but to respond quickly to
+46:   any condition that makes it [unhealthy](#consensus-health), including,
+47:   but not limited to, malicious attacks.
+48: 
+49: 3. Once there are more transactions in the open ledger than indicated
+50:    by the limit, the required fee level jumps drastically.
+51: 
+52: - The formula is `( lastLedgerMedianFeeLevel *
+53: TransactionsInOpenLedger^2 / limit^2 )`,
+54:   and returns a [fee level](#fee-level).
+55: 
+56: 4. That may still be pretty small, but as more transactions get
+57:    into the ledger, the fee level increases exponentially.
+58: 
+59: - For example, if the limit is 6, and the median fee is minimal,
+60:   and assuming all [reference transactions](#reference-transaction),
+61:   the 8th transaction only requires a [level](#fee-level) of about 174,000
+62:   or about 6800 drops,
+63:   but the 20th transaction requires a [level](#fee-level) of about
+64:   1,283,000 or about 50,000 drops.
+65: 
+66: 5. Finally, as each ledger closes, the median fee level of that ledger is
+67:    computed and used as `lastLedgerMedianFeeLevel` (with a
+68:    [minimum value of 128,000](#other-constants))
+69:    in the fee escalation formula for the next open ledger.
+70: 
+71: - Continuing the example above, if ledger consensus completes with
+72:   only those 20 transactions, and all of those transactions paid the
+73:   minimum required fee at each step, the limit will be adjusted from
+74:   6 to 24, and the `lastLedgerMedianFeeLevel` will be about 322,000,
+75:   which is 12,600 drops for a
+76:   [reference transaction](#reference-transaction).
+77: - This will only require 10 drops for the first 25 transactions,
+78:   but the 26th transaction will require a level of about 349,150
+79:   or about 13,649 drops.
+80: 
+81: - This example assumes a cold-start scenario, with a single, possibly
+82:   malicious, user willing to pay arbitrary amounts to get transactions
+83:   into the open ledger. It ignores the effects of the [Transaction
+84:   Queue](#transaction-queue). Any lower fee level transactions submitted
+85:   by other users at the same time as this user's transactions will go into
+86:   the transaction queue, and will have the first opportunity to be applied
+87:   to the _next_ open ledger. The next section describes how that works in
+88:   more detail.
+89: 
+90: ## Transaction Queue
