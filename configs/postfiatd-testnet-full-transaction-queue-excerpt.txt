@@ -1,0 +1,151 @@
+# Verbatim excerpt from the pinned postfiatd revision
+# repo: https://github.com/postfiatorg/postfiatd
+# commit: 0085a1ff885d6a446369cf73a4430f75af22be55
+# file: cfg/postfiatd-testnet-full.cfg, lines 531-669
+# Finding: lines 531-669 contain ZERO non-comment, non-blank lines.
+# The [transaction_queue] section is entirely commented out, so the
+# testnet node runs the code defaults in src/xrpld/app/misc/TxQ.h (Setup).
+# The [voting] section (reference_fee / account_reserve / owner_reserve,
+# lines 1215-1249) is likewise entirely commented out, so the 10-drop
+# reference fee and 10 / 2 PFT reserves are the code defaults in
+# src/xrpld/core/Config.h (FeeSetup).
+# ----
+531: # [transaction_queue] EXPERIMENTAL
+532: #
+533: #   This section is EXPERIMENTAL, and should not be
+534: #   present for production configuration settings.
+535: #
+536: #   A set of key/value pair parameters to tune the performance of the
+537: #   transaction queue.
+538: #
+539: #   ledgers_in_queue = <number>
+540: #
+541: #       The queue will be limited to this <number> of average ledgers'
+542: #       worth of transactions. If the queue fills up, the transactions
+543: #       with the lowest fee levels will be dropped from the queue any
+544: #       time a transaction with a higher fee level is added.
+545: #       Default: 20.
+546: #
+547: #   minimum_queue_size = <number>
+548: #
+549: #       The queue will always be able to hold at least this <number> of
+550: #       transactions, regardless of recent ledger sizes or the value of
+551: #       ledgers_in_queue. Default: 2000.
+552: #
+553: #   retry_sequence_percent = <number>
+554: #
+555: #       If a client replaces a transaction in the queue (same sequence
+556: #       number as a transaction already in the queue), the new
+557: #       transaction's fee must be more than <number> percent higher
+558: #       than the original transaction's fee, or meet the current open
+559: #       ledger fee to be considered. Default: 25.
+560: #
+561: #   minimum_escalation_multiplier = <number>
+562: #
+563: #       At ledger close time, the median fee level of the transactions
+564: #       in that ledger is used as a multiplier in escalation
+565: #       calculations of the next ledger. This minimum value ensures that
+566: #       the escalation is significant. Default: 500.
+567: #
+568: #   minimum_txn_in_ledger = <number>
+569: #
+570: #       Minimum number of transactions that must be allowed into the
+571: #       ledger at the minimum required fee before the required fee
+572: #       escalates. Default: 5.
+573: #
+574: #   minimum_txn_in_ledger_standalone = <number>
+575: #
+576: #       Like minimum_txn_in_ledger when rippled is running in standalone
+577: #       mode. Default: 1000.
+578: #
+579: #   target_txn_in_ledger = <number>
+580: #
+581: #       Number of transactions allowed into the ledger at the minimum
+582: #       required fee that the queue will "work toward" as long as
+583: #       consensus stays healthy. The limit will grow quickly until it
+584: #       reaches or exceeds this number. After that the limit may still
+585: #       change, but will stay above the target. If consensus is not
+586: #       healthy, the limit will be clamped to this value or lower.
+587: #       Default: 50.
+588: #
+589: #   maximum_txn_in_ledger = <number>
+590: #
+591: #       (Optional) Maximum number of transactions that will be allowed
+592: #       into the ledger at the minimum required fee before the required
+593: #       fee escalates. Default: no maximum.
+594: #
+595: #   normal_consensus_increase_percent = <number>
+596: #
+597: #       (Optional) When the ledger has more transactions than "expected",
+598: #       and performance is humming along nicely, the expected ledger size
+599: #       is updated to the previous ledger size plus this percentage.
+600: #       Default: 20
+601: #
+602: #   slow_consensus_decrease_percent = <number>
+603: #
+604: #       (Optional) When consensus takes longer than appropriate, the
+605: #       expected ledger size is updated to the minimum of the previous
+606: #       ledger size or the "expected" ledger size minus this percentage.
+607: #       Default: 50
+608: #
+609: #   maximum_txn_per_account = <number>
+610: #
+611: #       Maximum number of transactions that one account can have in the
+612: #       queue at any given time. Default: 10.
+613: #
+614: #   minimum_last_ledger_buffer = <number>
+615: #
+616: #       If a transaction has a LastLedgerSequence, it must be at least
+617: #       this much larger than the current open ledger sequence number.
+618: #       Default: 2.
+619: #
+620: #   zero_basefee_transaction_feelevel = <number>
+621: #
+622: #       So we don't deal with infinite fee levels, treat any transaction
+623: #       with a 0 base fee (ie. SetRegularKey password recovery) as
+624: #       having this fee level.
+625: #       Default: 256000.
+626: #
+627: #
+628: #-------------------------------------------------------------------------------
+629: #
+630: # 3. Protocol
+631: #
+632: #-------------------
+633: #
+634: #   These settings affect the behavior of the server instance with respect
+635: #   to protocol level activities such as validating and closing ledgers
+636: #   adjusting fees in response to server overloads.
+637: #
+638: #
+639: #
+640: #
+641: # [relay_proposals]
+642: #
+643: #   Controls the relay and processing behavior for proposals received by this
+644: #   server that are issued by validators that are not on the server's UNL.
+645: #
+646: #   Legal values are:
+647: #     "all"            - Relay and process all incoming proposals
+648: #     "trusted"        - Relay only trusted proposals, but locally process all
+649: #     "drop_untrusted" - Relay only trusted proposals, do not process untrusted
+650: #
+651: #   The default is "trusted".
+652: #
+653: #
+654: # [relay_validations]
+655: #
+656: #   Controls the relay and processing behavior for validations received by this
+657: #   server that are issued by validators that are not on the server's UNL.
+658: #
+659: #   Legal values are:
+660: #     "all"            - Relay and process all incoming validations
+661: #     "trusted"        - Relay only trusted validations, but locally process all
+662: #     "drop_untrusted" - Relay only trusted validations, do not process untrusted
+663: #
+664: #   The default is "all".
+665: #
+666: #
+667: #
+668: #
+669: #
