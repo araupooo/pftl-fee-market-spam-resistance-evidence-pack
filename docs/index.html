@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PFTL Fee-Market and Spam-Resistance — Results</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 900px; margin: 2em auto; padding: 0 1em; line-height: 1.5; color: #1a1a1a; }
+h1 { font-size: 1.6em; } h2 { font-size: 1.25em; margin-top: 1.5em; }
+table { border-collapse: collapse; width: 100%; margin: 0.5em 0; }
+th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; font-size: 0.95em; }
+th { background: #f0f0f0; }
+code { background: #f4f4f4; padding: 1px 4px; }
+.sev-HIGH { color: #b00020; font-weight: bold; }
+.sev-MEDIUM { color: #8a5a00; font-weight: bold; }
+.sev-LOW { color: #444; font-weight: bold; }
+.sev-INFO { color: #444; }
+.note { background: #fff8e1; border-left: 4px solid #e6a700; padding: 0.5em 1em; }
+</style>
+</head>
+<body>
+<h1>PFTL Fee-Market and Spam-Resistance — Results</h1>
+<p>Live testnet observations (network 2025, postfiatd 1.0.9) plus a model
+computed from the pinned protocol revision
+(<code>0085a1ff885d6a446369cf73a4430f75af22be55</code>, tag v1.0.9).
+Probe window: 2026-11-22 18:47–19:00 UTC. Assessment only: no transactions
+were sent and no flood traffic was generated — see
+<a href="methodology.md">methodology</a> for the safety boundary.</p>
+
+<h2>Verdict</h2>
+<p><strong>Not yet proven — sound on paper, untested in practice.</strong>
+The pinned code implements a coherent, layered defence, and every
+parameter is at its documented default on the testnet. But the testnet is
+idle, so no part of the defence has ever been observed working under load.
+Full reasoning: <a href="decision-memo.md">decision memo</a>.</p>
+
+<h2>Measured findings</h2>
+<table>
+<tr><th>Measurement</th><th>Value</th><th>Evidence</th></tr>
+<tr><td>Base fee</td><td>10 drops (constant, 20/20 samples)</td><td><a href="../outputs/fee.json">fee.json</a>, <a href="../outputs/fee-timeseries.jsonl">fee-timeseries.jsonl</a></td></tr>
+<tr><td>Median fee</td><td>5000 drops (level 128000 — the code floor, not a market price)</td><td><a href="../outputs/fee.json">fee.json</a></td></tr>
+<tr><td>Open-ledger fee</td><td>10 drops (constant)</td><td><a href="../outputs/fee.json">fee.json</a></td></tr>
+<tr><td>Fee queue</td><td>0 / 2000 in every sample</td><td><a href="../outputs/fee-timeseries.jsonl">fee-timeseries.jsonl</a></td></tr>
+<tr><td>Expected ledger size</td><td>32 transactions (the code floor)</td><td><a href="../outputs/fee.json">fee.json</a></td></tr>
+<tr><td>Load factors</td><td>All 256 (no escalation, no load)</td><td><a href="../outputs/server_state.json">server_state.json</a></td></tr>
+<tr><td>Ledger cadence</td><td>3.024 s mean close interval (explorer: 3.022 s)</td><td><a href="../outputs/derived/live-fee-market.json">live-fee-market.json</a></td></tr>
+<tr><td>Transactions per ledger</td><td>4 in 12 ledgers (mean 0.33); 0–4 across the time series (mean 0.50)</td><td><a href="../outputs/ledger-load-sample.json">ledger-load-sample.json</a></td></tr>
+<tr><td>Explorer load</td><td>0.09 txn/s, 0.26 txn/ledger, avg fee 10 drops</td><td><a href="../outputs/explorer_metrics.json">explorer_metrics.json</a></td></tr>
+<tr><td>Reserves</td><td>10 PFT account reserve, 2 PFT owner reserve</td><td><a href="../outputs/server_state.json">server_state.json</a></td></tr>
+<tr><td>Fees burned to date</td><td>33.454124 PFT</td><td><a href="../outputs/ledger_current.json">ledger_current.json</a></td></tr>
+<tr><td>Explorer health</td><td>HTTP 500 “rippled unreachable” while metrics return 200</td><td><a href="../outputs/explorer_health.json">explorer_health.json</a></td></tr>
+</table>
+
+<h2>Modelled findings (pinned constants, no traffic sent)</h2>
+<table>
+<tr><th>Quantity</th><th>Value</th><th>Evidence</th></tr>
+<tr><td>Fee once 33 txs are in the open ledger</td><td>5,318 drops (from 10 — a 532x cliff)</td><td><a href="../outputs/derived/escalation-model.json">escalation-model.json</a></td></tr>
+<tr><td>Fee once 100 txs are in the open ledger</td><td>48,829 drops</td><td><a href="../outputs/derived/escalation-model.json">escalation-model.json</a></td></tr>
+<tr><td>Fee once 256 txs are in the open ledger</td><td>320,000 drops</td><td><a href="../outputs/derived/escalation-model.json">escalation-model.json</a></td></tr>
+<tr><td>Cost to fill one ledger with 256 txs</td><td>27.091469 PFT</td><td><a href="../outputs/derived/escalation-model.json">escalation-model.json</a></td></tr>
+<tr><td>Cost to fill the 2,000-slot queue (fees)</td><td>20,000 drops (0.02 PFT)</td><td><a href="../outputs/derived/escalation-model.json">escalation-model.json</a></td></tr>
+<tr><td>Accounts / reserve locked to fill the queue</td><td>200 accounts / 2,000 PFT</td><td><a href="../outputs/derived/escalation-model.json">escalation-model.json</a></td></tr>
+<tr><td>Server-local load-fee cap</td><td>1,000,000x base (10 PFT per reference tx)</td><td><a href="../outputs/derived/escalation-model.json">escalation-model.json</a></td></tr>
+</table>
+<p>Derivation and tables: <a href="escalation-model.md">escalation model</a>.
+Model code: <a href="../src/fee_model.py">src/fee_model.py</a>.</p>
+
+<h2>Resilience gaps (12 findings)</h2>
+<table>
+<tr><th>ID</th><th>Severity</th><th>Gap</th></tr>
+<tr><td>F-01</td><td class="sev-HIGH">HIGH</td><td>Fee escalation and queue eviction have never been exercised live</td></tr>
+<tr><td>F-02</td><td class="sev-MEDIUM">MEDIUM</td><td>The 5000-drop median fee is a floor artifact, not a market price</td></tr>
+<tr><td>F-03</td><td class="sev-HIGH">HIGH</td><td>Queue-fill cost is dominated by the account reserve, not by fees</td></tr>
+<tr><td>F-04</td><td class="sev-MEDIUM">MEDIUM</td><td>The 10-transaction per-account queue cap is trivially bypassed with fresh accounts</td></tr>
+<tr><td>F-05</td><td class="sev-MEDIUM">MEDIUM</td><td>Queue eviction can shelter a cheap transaction behind expensive ones from the same account</td></tr>
+<tr><td>F-06</td><td class="sev-LOW">LOW</td><td>The base fee cannot react faster than one flag ledger (~13 minutes)</td></tr>
+<tr><td>F-07</td><td class="sev-MEDIUM">MEDIUM</td><td>No per-client rate limit is observable on the public RPC proxy</td></tr>
+<tr><td>F-08</td><td class="sev-LOW">LOW</td><td>The <code>fee</code> RPC is documented experimental and may change without warning</td></tr>
+<tr><td>F-09</td><td class="sev-LOW">LOW</td><td>Explorer health reports the node unreachable while metrics still answer</td></tr>
+<tr><td>F-10</td><td class="sev-INFO">INFO</td><td>Server-local load fee can reach 1,000,000x base, but it is per-node, not consensus</td></tr>
+<tr><td>F-11</td><td class="sev-MEDIUM">MEDIUM</td><td>Slow consensus halves the cheap-transaction allowance, hurting legitimate users too</td></tr>
+<tr><td>F-12</td><td class="sev-LOW">LOW</td><td>Fee-burn accounting reconciles: no anomaly in total supply</td></tr>
+</table>
+<p>Detail and remediations: <a href="gap-register.md">gap register</a>;
+machine-readable: <a href="../findings.json">findings.json</a>.</p>
+
+<h2>Claims (30 total)</h2>
+<p>9 VERIFIED (measured live), 16 SPECIFIED (pinned code or model),
+1 UNVERIFIED, 4 UNTESTABLE. The UNTESTABLE claims (C-24 queue eviction
+order, C-25 fee prioritisation under congestion, C-26 median-fee rise
+after a busy ledger, C-28 RPC-layer dropping of spam) would need submitted
+transactions or flood traffic to test, which this pack's safety boundary
+forbids. Full table: <a href="claim-index.md">claim-to-evidence index</a>.</p>
+
+<div class="note"><p><strong>Reproduction:</strong>
+<code>bash scripts/clean_reproduce.sh</code> re-probes the live endpoints,
+recomputes the model and the analysis in a throwaway directory, and exits 0
+only if every comparison check passes. <code>bash scripts/verify_digests.sh</code>
+verifies <code>SHA256SUMS</code>. Full instructions in the
+<a href="../README.md">README</a>.</p></div>
+
+<h2>Documents</h2>
+<ul>
+<li><a href="methodology.md">Methodology</a> — safety boundary, methods, limitations</li>
+<li><a href="escalation-model.md">Escalation model</a> — derivation and tables</li>
+<li><a href="decision-memo.md">Decision memo</a> — launch-readiness assessment</li>
+<li><a href="claim-index.md">Claim-to-evidence index</a> — 30 claims</li>
+<li><a href="gap-register.md">Gap register</a> — 12 findings with remediations</li>
+<li><a href="citations.md">Citations</a> — every source with file:line or URL</li>
+<li><a href="evidence-index.md">Evidence index</a> — every file and what it supports</li>
+<li><a href="../run-manifest.json">run-manifest.json</a> — pack manifest and counts</li>
+</ul>
+</body>
+</html>
