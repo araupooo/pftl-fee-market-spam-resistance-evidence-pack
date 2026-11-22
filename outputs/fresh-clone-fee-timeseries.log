@@ -1,0 +1,18 @@
+fee_timeseries.py start: 2026-11-22T19:02:39Z samples=5 interval=30s
+safety boundary: read-only queries only; no transactions, no flood traffic
+sample 0 2026-11-22T19:02:39Z seq=8277681 base=10 median=5000 open=10 queue=0/2000 txns=0 load=1
+sample 1 2026-11-22T19:03:12Z seq=8277692 base=10 median=5000 open=10 queue=0/2000 txns=0 load=1
+sample 2 2026-11-22T19:03:44Z seq=8277703 base=10 median=5000 open=10 queue=0/2000 txns=0 load=1
+sample 3 2026-11-22T19:04:17Z seq=8277713 base=10 median=5000 open=10 queue=0/2000 txns=1 load=1
+sample 4 2026-11-22T19:04:49Z seq=8277724 base=10 median=5000 open=10 queue=0/2000 txns=0 load=1
+fee_timeseries.py end: 5/5 samples ok
+  base_fee_drops distinct values: ['10']
+  median_fee_drops distinct values: ['5000']
+  minimum_fee_drops distinct values: ['10']
+  open_ledger_fee_drops distinct values: ['10']
+  current_queue_size distinct values: ['0']
+  expected_ledger_size distinct values: ['32']
+  max_queue_size distinct values: ['2000']
+  txn_count_validated_ledger: min=0 max=1 mean=0.200
+  validated_seq range: 8277681-8277724 (delta 43 over 5 samples)
+fee-timeseries jsonl sha256=ce2f073cb569858b9422cd8538e16e94253d79987ca1a2d10a982f273141f470

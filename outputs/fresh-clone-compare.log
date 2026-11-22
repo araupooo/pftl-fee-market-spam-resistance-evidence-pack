@@ -1,0 +1,28 @@
+PASS fee.base_fee_drops == 10 (shipped=10 fresh=10)
+PASS fee.median_fee_drops == 5000 (shipped=5000 fresh=5000)
+PASS fee.minimum_fee_drops == 10 (shipped=10 fresh=10)
+PASS fee.open_ledger_fee_drops == 10 (shipped=10 fresh=10)
+PASS fee.median_level == 128000 (shipped=128000 fresh=128000)
+PASS fee.minimum_level == 256 (shipped=256 fresh=256)
+PASS fee.open_ledger_level == 256 (shipped=256 fresh=256)
+PASS fee.reference_level == 256 (shipped=256 fresh=256)
+PASS fee.expected_ledger_size == 32 (shipped=32 fresh=32)
+PASS fee.max_queue_size == 2000 (shipped=2000 fresh=2000)
+PASS fee.current_queue_size == 0 (fresh=0)
+PASS validated seq increased (shipped=8277391 fresh=8277673)
+PASS network_id == 2025 (fresh=2025)
+PASS build_version == 1.0.9 (fresh=1.0.9)
+PASS load factors all 256 (fresh={'load_factor': 256, 'load_factor_fee_escalation': 256, 'load_factor_fee_queue': 256, 'load_factor_fee_reference': 256, 'load_factor_server': 256})
+PASS burned_pft did not decrease (shipped=33.454124 fresh=33.455044)
+PASS reserves unchanged (fresh={'base': 10000000, 'increment': 2000000})
+PASS mean close interval 2.5-4.0 s (fresh=3.023)
+PASS timeseries samples all ok (errors=0)
+PASS timeseries queue always 0 (fresh=['0'])
+PASS model escalation_curve identical 
+PASS model queue identical 
+PASS model cumulative fill costs identical 
+PASS model resource charges identical 
+PASS model sustained scenarios identical 
+PASS ledger-load mean < 5 tx/ledger (fresh mean=0.417)
+compare_reproduce.py: 26/26 CHECKS PASSED
+compare_reproduce.py: ALL CHECKS PASSED

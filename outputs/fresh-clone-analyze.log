@@ -1,0 +1,7 @@
+wrote outputs/derived/live-fee-market.json sha256=6bbd65cdc5fdfaa5157fcedc82239179bb536057b9189b30d6b753943b614da4
+wrote outputs/derived/ledger-load.json sha256=94bb063fe5f86228d342f174c7a100670431eca53b07d92d5c833ac571638fca
+wrote findings.json sha256=c2dc3541c0734d5cfa4b08074149d5c395cc2b7c4da8d16bc6fdc9e074881751
+wrote docs/claim-index.md sha256=921873ff24b88f4a914ffc66c2f388054f93c2fa1e56980257c60af435a40b6c
+wrote docs/gap-register.md sha256=0e804d4597665e6005888472964a39f1f21fe5fe9909cb5814a90ca2c64c175b
+wrote run-manifest.json sha256=077d4d73a02ad9ff14403bb8ca10e7db6d04798fc491be908cba608ac71c7cd5
+counts: findings=12 {'HIGH': 2, 'MEDIUM': 5, 'LOW': 4, 'INFO': 1}; claims=30 {'VERIFIED': 9, 'SPECIFIED': 16, 'UNTESTABLE': 4, 'UNVERIFIED': 1}
