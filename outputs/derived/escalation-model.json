@@ -1,0 +1,685 @@
+{
+ "inputs": {
+  "params_file": "/home/hatch/workspace/goals/postfiat-task-node-connection/hidden_files/task-738365b90a3ec891f98d633c735c379e/pack/configs/fee-parameters.json",
+  "constants": {
+   "account_reserve_drops": 10000000,
+   "account_reserve_drops_source": "src/xrpld/core/Config.h:72 FeeSetup::account_reserve{10 * DROPS_PER_XRP}; live validated ledger reserve_base 10000000",
+   "base_fee_level": 256,
+   "base_fee_level_source": "src/xrpld/app/misc/TxQ.h:64 TxQ::baseLevel{256}",
+   "escalation_formula": "open_ledger_fee_level(n) = 256 if n <= txnsExpected, else escalationMultiplier * n^2 / txnsExpected^2",
+   "escalation_formula_source": "src/xrpld/app/misc/detail/TxQ.cpp:173-191 FeeMetrics::scaleFeeLevel",
+   "fee_rejection_source": "src/xrpld/app/tx/detail/Transactor.cpp:380-410 Transactor::checkFee returns telINSUF_FEE_P when feePaid < minimumFee (scaleFeeLoad of the base fee)",
+   "flag_ledger_interval": 256,
+   "flag_ledger_interval_source": "src/xrpld/app/ledger/Ledger.h:426 FLAG_LEDGER_INTERVAL = 256 (fee votes happen at flag ledgers)",
+   "ledgers_in_queue": 20,
+   "ledgers_in_queue_source": "src/xrpld/app/misc/TxQ.h:81 TxQ::Setup::ledgersInQueue = 20",
+   "load_factor_normal": 256,
+   "load_factor_normal_source": "src/xrpld/app/misc/LoadFeeTrack.h:141-142 lftNormalFee = 256",
+   "load_fee_dec_fraction": 4,
+   "load_fee_dec_fraction_source": "src/xrpld/app/misc/LoadFeeTrack.h:145-146 lftFeeDecFraction = 4 (fee falls by 1/4 per lower)",
+   "load_fee_inc_fraction": 4,
+   "load_fee_inc_fraction_source": "src/xrpld/app/misc/LoadFeeTrack.h:143-144 lftFeeIncFraction = 4 (fee rises by 1/4 per raise)",
+   "load_fee_max_multiplier": 1000000,
+   "load_fee_max_multiplier_source": "src/xrpld/app/misc/LoadFeeTrack.h:147 lftFeeMax = lftNormalFee * 1000000",
+   "load_fee_scale_source": "src/xrpld/app/misc/detail/LoadFeeTrack.cpp:84-112 scaleFeeLoad; raise/lower at lines 32-80",
+   "maximum_txn_per_account": 10,
+   "maximum_txn_per_account_source": "src/xrpld/app/misc/TxQ.h:148 TxQ::Setup::maximumTxnPerAccount = 10",
+   "min_processing_fee_formula": "baseLevel (256) while the queue is not full; lowest queued fee level + 1 when full",
+   "min_processing_fee_formula_source": "src/xrpld/app/misc/detail/TxQ.cpp:1791-1792 TxQ::getMetrics",
+   "minimum_escalation_multiplier": 128000,
+   "minimum_escalation_multiplier_source": "src/xrpld/app/misc/TxQ.h:100 TxQ::Setup::minimumEscalationMultiplier = baseLevel * 500 = 128000",
+   "minimum_last_ledger_buffer": 2,
+   "minimum_last_ledger_buffer_source": "src/xrpld/app/misc/TxQ.h:155 TxQ::Setup::minimumLastLedgerBuffer = 2",
+   "minimum_txn_in_ledger": 32,
+   "minimum_txn_in_ledger_source": "src/xrpld/app/misc/TxQ.h:103 TxQ::Setup::minimumTxnInLedger = 32",
+   "minimum_txn_in_ledger_standalone": 1000,
+   "minimum_txn_in_ledger_standalone_source": "src/xrpld/app/misc/TxQ.h:106 minimumTxnInLedgerSA = 1000 (standalone only; testnet is not standalone)",
+   "normal_consensus_increase_percent": 20,
+   "normal_consensus_increase_percent_source": "src/xrpld/app/misc/TxQ.h:132 TxQ::Setup::normalConsensusIncreasePercent = 20",
+   "owner_reserve_drops": 2000000,
+   "owner_reserve_drops_source": "src/xrpld/core/Config.h:75 FeeSetup::owner_reserve{2 * DROPS_PER_XRP}; live validated ledger reserve_inc 2000000",
+   "queue_capacity_formula": "max(txnsExpected * ledgersInQueue, queueSizeMin)",
+   "queue_capacity_formula_source": "src/xrpld/app/misc/detail/TxQ.cpp:1376-1377 maxSize_ = max(snapshot.txnsExpected * setup_.ledgersInQueue, setup_.queueSizeMin)",
+   "queue_size_min": 2000,
+   "queue_size_min_source": "src/xrpld/app/misc/TxQ.h:87 TxQ::Setup::queueSizeMin = 2000",
+   "reference_fee_drops": 10,
+   "reference_fee_drops_source": "src/xrpld/core/Config.h:69 FeeSetup::reference_fee{10} (default-constructed; testnet config sets no override)",
+   "resource_charges": {
+    "feeDrop": 6000,
+    "feeExceptionRPC": 100,
+    "feeHeavyBurdenPeer": 2000,
+    "feeHeavyBurdenRPC": 3000,
+    "feeInvalidSignature": 2000,
+    "feeMalformedRPC": 100,
+    "feeMediumBurdenRPC": 400,
+    "feeModerateBurdenPeer": 250,
+    "feeReferenceRPC": 20,
+    "feeTrivialPeer": 1,
+    "feeWarning": 4000
+   },
+   "resource_charges_source": "src/libxrpl/resource/Fees.cpp:26-44 (Charge table; full table in fixtures/source-excerpts/resource-fees.txt)",
+   "resource_decay_window_seconds": 32,
+   "resource_decay_window_seconds_source": "include/xrpl/resource/detail/Tuning.h:40 decayWindowSeconds = 32",
+   "resource_drop_threshold": 25000,
+   "resource_drop_threshold_source": "include/xrpl/resource/detail/Tuning.h:35 dropThreshold = 25000",
+   "resource_minimum_gossip_balance": 1000,
+   "resource_minimum_gossip_balance_source": "include/xrpl/resource/detail/Tuning.h:44 minimumGossipBalance = 1000",
+   "resource_warning_threshold": 5000,
+   "resource_warning_threshold_source": "include/xrpl/resource/detail/Tuning.h:31 warningThreshold = 5000",
+   "retries_allowed": 10,
+   "retries_allowed_source": "src/xrpld/app/misc/TxQ.h:580 TxQ::retriesAllowed = 10",
+   "retry_sequence_percent": 25,
+   "retry_sequence_percent_source": "src/xrpld/app/misc/TxQ.h:97 TxQ::Setup::retrySequencePercent = 25",
+   "slow_consensus_decrease_percent": 50,
+   "slow_consensus_decrease_percent_source": "src/xrpld/app/misc/TxQ.h:146 TxQ::Setup::slowConsensusDecreasePercent = 50",
+   "target_txn_in_ledger": 256,
+   "target_txn_in_ledger_source": "src/xrpld/app/misc/TxQ.h:109 TxQ::Setup::targetTxnInLedger = 256"
+  }
+ },
+ "escalation_curve": [
+  {
+   "txns_in_open_ledger": 0,
+   "fee_level_for_next_tx": 256,
+   "fee_drops_for_next_reference_tx": 10
+  },
+  {
+   "txns_in_open_ledger": 1,
+   "fee_level_for_next_tx": 256,
+   "fee_drops_for_next_reference_tx": 10
+  },
+  {
+   "txns_in_open_ledger": 5,
+   "fee_level_for_next_tx": 256,
+   "fee_drops_for_next_reference_tx": 10
+  },
+  {
+   "txns_in_open_ledger": 10,
+   "fee_level_for_next_tx": 256,
+   "fee_drops_for_next_reference_tx": 10
+  },
+  {
+   "txns_in_open_ledger": 20,
+   "fee_level_for_next_tx": 256,
+   "fee_drops_for_next_reference_tx": 10
+  },
+  {
+   "txns_in_open_ledger": 31,
+   "fee_level_for_next_tx": 256,
+   "fee_drops_for_next_reference_tx": 10
+  },
+  {
+   "txns_in_open_ledger": 32,
+   "fee_level_for_next_tx": 256,
+   "fee_drops_for_next_reference_tx": 10
+  },
+  {
+   "txns_in_open_ledger": 33,
+   "fee_level_for_next_tx": 136125,
+   "fee_drops_for_next_reference_tx": 5318
+  },
+  {
+   "txns_in_open_ledger": 35,
+   "fee_level_for_next_tx": 153125,
+   "fee_drops_for_next_reference_tx": 5982
+  },
+  {
+   "txns_in_open_ledger": 40,
+   "fee_level_for_next_tx": 200000,
+   "fee_drops_for_next_reference_tx": 7813
+  },
+  {
+   "txns_in_open_ledger": 50,
+   "fee_level_for_next_tx": 312500,
+   "fee_drops_for_next_reference_tx": 12208
+  },
+  {
+   "txns_in_open_ledger": 64,
+   "fee_level_for_next_tx": 512000,
+   "fee_drops_for_next_reference_tx": 20000
+  },
+  {
+   "txns_in_open_ledger": 80,
+   "fee_level_for_next_tx": 800000,
+   "fee_drops_for_next_reference_tx": 31250
+  },
+  {
+   "txns_in_open_ledger": 100,
+   "fee_level_for_next_tx": 1250000,
+   "fee_drops_for_next_reference_tx": 48829
+  },
+  {
+   "txns_in_open_ledger": 128,
+   "fee_level_for_next_tx": 2048000,
+   "fee_drops_for_next_reference_tx": 80000
+  },
+  {
+   "txns_in_open_ledger": 200,
+   "fee_level_for_next_tx": 5000000,
+   "fee_drops_for_next_reference_tx": 195313
+  },
+  {
+   "txns_in_open_ledger": 256,
+   "fee_level_for_next_tx": 8192000,
+   "fee_drops_for_next_reference_tx": 320000
+  },
+  {
+   "txns_in_open_ledger": 512,
+   "fee_level_for_next_tx": 32768000,
+   "fee_drops_for_next_reference_tx": 1280000
+  },
+  {
+   "txns_in_open_ledger": 1000,
+   "fee_level_for_next_tx": 125000000,
+   "fee_drops_for_next_reference_tx": 4882813
+  }
+ ],
+ "cumulative_open_ledger_fill_cost": [
+  {
+   "txns_in_open_ledger": 33,
+   "cumulative_minimum_fee_drops": 330,
+   "cumulative_minimum_fee_pft": 0.00033
+  },
+  {
+   "txns_in_open_ledger": 40,
+   "cumulative_minimum_fee_drops": 44767,
+   "cumulative_minimum_fee_pft": 0.044767
+  },
+  {
+   "txns_in_open_ledger": 50,
+   "cumulative_minimum_fee_drops": 141868,
+   "cumulative_minimum_fee_pft": 0.141868
+  },
+  {
+   "txns_in_open_ledger": 64,
+   "cumulative_minimum_fee_drops": 361207,
+   "cumulative_minimum_fee_pft": 0.361207
+  },
+  {
+   "txns_in_open_ledger": 100,
+   "cumulative_minimum_fee_drops": 1547779,
+   "cumulative_minimum_fee_pft": 1.547779
+  },
+  {
+   "txns_in_open_ledger": 256,
+   "cumulative_minimum_fee_drops": 27091469,
+   "cumulative_minimum_fee_pft": 27.091469
+  },
+  {
+   "txns_in_open_ledger": 512,
+   "cumulative_minimum_fee_drops": 217758485,
+   "cumulative_minimum_fee_pft": 217.758485
+  }
+ ],
+ "queue": {
+  "capacity_txns": 2000,
+  "fill_fee_cost_drops": 20000,
+  "fill_fee_cost_pft": 0.02,
+  "accounts_needed_to_fill_queue": 200,
+  "reserve_locked_to_fill_queue_drops": 2000000000,
+  "reserve_locked_to_fill_queue_pft": 2000.0
+ },
+ "server_local_load_fee": {
+  "normal_factor": 256,
+  "increase_fraction": 4,
+  "decrease_fraction": 4,
+  "max_factor": 256000000,
+  "max_multiplier_vs_base": 1000000,
+  "max_minimum_fee_drops_reference_tx": 10000000,
+  "raises_to_reach_max_from_normal": 62
+ },
+ "resource_charges": {
+  "warning_threshold": 5000,
+  "drop_threshold": 25000,
+  "decay_window_seconds": 32,
+  "heavy_rpc_requests_to_warn": 2,
+  "heavy_rpc_requests_to_drop": 9,
+  "reference_rpc_requests_to_warn": 250,
+  "reference_rpc_requests_to_drop": 1250,
+  "invalid_signature_requests_to_drop": 13,
+  "note": "Counts ignore decay: with the 32 s exponential decay window, a slow trickle never reaches either threshold; the counts are the worst case for a burst inside one decay window."
+ },
+ "sustained_load_dynamics": {
+  "algorithm": "FeeMetrics::update (TxQ.cpp), healthy growth +20%, slow-consensus cut -50%, floor 32, median-of-ledger multiplier floored at 128000",
+  "scenario_idle_20_ledgers": [
+   {
+    "ledger": 0,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 1,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 2,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 3,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 4,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 5,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 6,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 7,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 8,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 9,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 10,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 11,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 12,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 13,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 14,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 15,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 16,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 17,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 18,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   },
+   {
+    "ledger": 19,
+    "txns": 0,
+    "slow_consensus": false,
+    "txns_expected_after": 32,
+    "escalation_multiplier_after": 128000,
+    "fee_level_for_tx_after_expected": 136125,
+    "fee_drops_for_tx_after_expected": 5318
+   }
+  ],
+  "scenario_flood_100_per_ledger_20_ledgers": [
+   {
+    "ledger": 0,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 306313,
+    "fee_level_for_tx_after_expected": 4379617,
+    "fee_drops_for_tx_after_expected": 171079
+   },
+   {
+    "ledger": 1,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 733027,
+    "fee_level_for_tx_after_expected": 10480711,
+    "fee_drops_for_tx_after_expected": 409403
+   },
+   {
+    "ledger": 2,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 1754182,
+    "fee_level_for_tx_after_expected": 25081033,
+    "fee_drops_for_tx_after_expected": 979728
+   },
+   {
+    "ledger": 3,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 4197874,
+    "fee_level_for_tx_after_expected": 60020579,
+    "fee_drops_for_tx_after_expected": 2344554
+   },
+   {
+    "ledger": 4,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 10045791,
+    "fee_level_for_tx_after_expected": 143633228,
+    "fee_drops_for_tx_after_expected": 5610673
+   },
+   {
+    "ledger": 5,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 24040244,
+    "fee_level_for_tx_after_expected": 343723840,
+    "fee_drops_for_tx_after_expected": 13426713
+   },
+   {
+    "ledger": 6,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 57529900,
+    "fee_level_for_tx_after_expected": 822553970,
+    "fee_drops_for_tx_after_expected": 32131015
+   },
+   {
+    "ledger": 7,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 137672871,
+    "fee_level_for_tx_after_expected": 1968426273,
+    "fee_drops_for_tx_after_expected": 76891652
+   },
+   {
+    "ledger": 8,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 329460322,
+    "fee_level_for_tx_after_expected": 4710574779,
+    "fee_drops_for_tx_after_expected": 184006828
+   },
+   {
+    "ledger": 9,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 788420429,
+    "fee_level_for_tx_after_expected": 11272718262,
+    "fee_drops_for_tx_after_expected": 440340558
+   },
+   {
+    "ledger": 10,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 1886742442,
+    "fee_level_for_tx_after_expected": 26976363372,
+    "fee_drops_for_tx_after_expected": 1053764195
+   },
+   {
+    "ledger": 11,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 4515099955,
+    "fee_level_for_tx_after_expected": 64556228946,
+    "fee_drops_for_tx_after_expected": 2521727694
+   },
+   {
+    "ledger": 12,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 10804934023,
+    "fee_level_for_tx_after_expected": 154487342803,
+    "fee_drops_for_tx_after_expected": 6034661829
+   },
+   {
+    "ledger": 13,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 25856924632,
+    "fee_level_for_tx_after_expected": 369698470251,
+    "fee_drops_for_tx_after_expected": 14441346495
+   },
+   {
+    "ledger": 14,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 61877337706,
+    "fee_level_for_tx_after_expected": 884712989603,
+    "fee_drops_for_tx_after_expected": 34559101157
+   },
+   {
+    "ledger": 15,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 148076578172,
+    "fee_level_for_tx_after_expected": 2117176934586,
+    "fee_drops_for_tx_after_expected": 82702224008
+   },
+   {
+    "ledger": 16,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 354357084775,
+    "fee_level_for_tx_after_expected": 5066544998233,
+    "fee_drops_for_tx_after_expected": 197911913994
+   },
+   {
+    "ledger": 17,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 848000035392,
+    "fee_level_for_tx_after_expected": 12124578631029,
+    "fee_drops_for_tx_after_expected": 473616352775
+   },
+   {
+    "ledger": 18,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 2029320397195,
+    "fee_level_for_tx_after_expected": 29014921811847,
+    "fee_drops_for_tx_after_expected": 1133395383276
+   },
+   {
+    "ledger": 19,
+    "txns": 100,
+    "slow_consensus": false,
+    "txns_expected_after": 120,
+    "escalation_multiplier_after": 4856298470045,
+    "fee_level_for_tx_after_expected": 69434634667899,
+    "fee_drops_for_tx_after_expected": 2712290416715
+   }
+  ],
+  "scenario_flood_1000_per_ledger_5_ledgers": [
+   {
+    "ledger": 0,
+    "txns": 1000,
+    "slow_consensus": false,
+    "txns_expected_after": 1200,
+    "escalation_multiplier_after": 31187563,
+    "fee_level_for_tx_after_expected": 43930636776,
+    "fee_drops_for_tx_after_expected": 1716040500
+   },
+   {
+    "ledger": 1,
+    "txns": 1000,
+    "slow_consensus": false,
+    "txns_expected_after": 1200,
+    "escalation_multiplier_after": 7598938049,
+    "fee_level_for_tx_after_expected": 10703824063296,
+    "fee_drops_for_tx_after_expected": 418118127473
+   },
+   {
+    "ledger": 2,
+    "txns": 1000,
+    "slow_consensus": false,
+    "txns_expected_after": 1200,
+    "escalation_multiplier_after": 1851502776069,
+    "fee_level_for_tx_after_expected": 2608017046586622,
+    "fee_drops_for_tx_after_expected": 101875665882290
+   },
+   {
+    "ledger": 3,
+    "txns": 1000,
+    "slow_consensus": false,
+    "txns_expected_after": 1200,
+    "escalation_multiplier_after": 451123894902933,
+    "fee_level_for_tx_after_expected": 635450739386606896,
+    "fee_drops_for_tx_after_expected": 24822294507289332
+   },
+   {
+    "ledger": 4,
+    "txns": 1000,
+    "slow_consensus": false,
+    "txns_expected_after": 1200,
+    "escalation_multiplier_after": 109917614590067612,
+    "fee_level_for_tx_after_expected": 18446744073709551615,
+    "fee_drops_for_tx_after_expected": 720575940379279360
+   }
+  ],
+  "scenario_flood_then_slow_consensus": [
+   {
+    "ledger": 0,
+    "txns": 1000,
+    "slow_consensus": false,
+    "txns_expected_after": 1200,
+    "escalation_multiplier_after": 31187563,
+    "fee_level_for_tx_after_expected": 43930636776,
+    "fee_drops_for_tx_after_expected": 1716040500
+   },
+   {
+    "ledger": 1,
+    "txns": 1000,
+    "slow_consensus": true,
+    "txns_expected_after": 500,
+    "escalation_multiplier_after": 7598938049,
+    "fee_level_for_tx_after_expected": 1862637743395,
+    "fee_drops_for_tx_after_expected": 72759286852
+   },
+   {
+    "ledger": 2,
+    "txns": 1000,
+    "slow_consensus": false,
+    "txns_expected_after": 1200,
+    "escalation_multiplier_after": 1851502776069,
+    "fee_level_for_tx_after_expected": 2608017046586622,
+    "fee_drops_for_tx_after_expected": 101875665882290
+   }
+  ],
+  "note": "Idle ledgers change nothing: with 0 transactions neither the growth nor the cut branch runs, so txnsExpected stays where the last busy ledger left it until a slow-consensus ledger halves it. The cheap-transaction allowance therefore stays elevated after a flood, which helps legitimate users but also gives the next flood a higher starting allowance. The flood scenarios assume the attacker pays the escalated minimum at every position in every ledger (worst-case willingness to pay). Under that assumption the multiplier compounds ~2.4x per 100-tx ledger, and the required fee exceeds the entire 100-billion-PFT supply within a few ledgers. In practice nobody can pay that, so transactions queue instead of entering the ledger and the multiplier stops compounding: the queue, not the open ledger, absorbs a sustained flood. Fee levels are capped at the uint64 maximum, as the C++ mulDiv does."
+ }
+}

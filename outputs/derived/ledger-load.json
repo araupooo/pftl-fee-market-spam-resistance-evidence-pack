@@ -1,0 +1,40 @@
+{
+ "generated_at_utc": "2026-11-22T19:01:00Z",
+ "ledger_load_sample": {
+  "ledgers": 12,
+  "seq_range": [
+   8277380,
+   8277391
+  ],
+  "txn_counts": [
+   0,
+   3,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0
+  ],
+  "total_txns": 4,
+  "mean_txns_per_ledger": 0.333,
+  "max_txns_per_ledger": 3
+ },
+ "fee_timeseries_txn_counts": {
+  "min": 0,
+  "max": 4,
+  "mean": 0.5
+ },
+ "explorer": {
+  "base_fee": "0.00001",
+  "txn_sec": "0.09",
+  "txn_ledger": "0.26",
+  "ledger_interval": "3.022",
+  "avg_fee": "0.00001000"
+ },
+ "interpretation": "The network is idle: 4 transactions in 12 consecutive validated ledgers (mean 0.33) and 0-4 transactions per validated ledger across the 20-sample fee time series (mean 0.50). No congested ledger was observed, so no escalation, queueing, or eviction event was observed live."
+}

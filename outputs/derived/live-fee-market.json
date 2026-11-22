@@ -1,0 +1,110 @@
+{
+ "generated_at_utc": "2026-11-22T19:01:00Z",
+ "probe_window_utc": "2026-11-22T18:47:58Z to 2026-11-22T18:48:23Z (probe_all.sh) + fee timeseries 2026-11-22T18:48:40Z to 2026-11-22T18:59:00Z",
+ "build_version": "1.0.9",
+ "network_id": 2025,
+ "server_state": "full",
+ "peers": 21,
+ "validated_ledger_seq": 8277391,
+ "complete_ledgers": "8200054-8277391",
+ "last_close": {
+  "converge_time_s": 2,
+  "proposers": 23
+ },
+ "job_queue_overflow": "0",
+ "peer_disconnects": "102",
+ "peer_disconnects_resources": "0",
+ "fee": {
+  "base_fee_drops": "10",
+  "median_fee_drops": "5000",
+  "minimum_fee_drops": "10",
+  "open_ledger_fee_drops": "10",
+  "median_level": "128000",
+  "minimum_level": "256",
+  "open_ledger_level": "256",
+  "reference_level": "256",
+  "current_ledger_size": "1",
+  "current_queue_size": "0",
+  "expected_ledger_size": "32",
+  "max_queue_size": "2000"
+ },
+ "load_factors_server_state": {
+  "load_factor": 256,
+  "load_factor_fee_escalation": 256,
+  "load_factor_fee_queue": 256,
+  "load_factor_fee_reference": 256,
+  "load_factor_server": 256
+ },
+ "reserves_drops": {
+  "base": 10000000,
+  "increment": 2000000
+ },
+ "total_coins_drops": 99999999966545876,
+ "burned_drops": 33454124,
+ "burned_pft": 33.454124,
+ "explorer": {
+  "metrics": {
+   "base_fee": "0.00001",
+   "txn_sec": "0.09",
+   "txn_ledger": "0.26",
+   "ledger_interval": "3.022",
+   "avg_fee": "0.00001000"
+  },
+  "health_http_500_body": {
+   "message": "rippled unreachable"
+  }
+ },
+ "features_known": 101,
+ "fee_timeseries": {
+  "samples": 20,
+  "errors": 0,
+  "window_seconds": 620.0,
+  "validated_seq_first": 8277406,
+  "validated_seq_last": 8277611,
+  "mean_close_interval_s": 3.024,
+  "distinct_base_fee_drops": [
+   "10"
+  ],
+  "distinct_median_fee_drops": [
+   "5000"
+  ],
+  "distinct_open_ledger_fee_drops": [
+   "10"
+  ],
+  "distinct_current_queue_size": [
+   "0"
+  ],
+  "distinct_expected_ledger_size": [
+   "32"
+  ],
+  "txn_count_validated_ledger": {
+   "min": 0,
+   "max": 4,
+   "mean": 0.5
+  }
+ },
+ "ledger_load_sample": {
+  "ledgers": 12,
+  "seq_range": [
+   8277380,
+   8277391
+  ],
+  "txn_counts": [
+   0,
+   3,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0
+  ],
+  "total_txns": 4,
+  "mean_txns_per_ledger": 0.333,
+  "max_txns_per_ledger": 3
+ }
+}
